@@ -1,6 +1,7 @@
 import User from '../entities/User'
 import jwt from 'jsonwebtoken'
 import { JWT_SECRET } from '../config/config'
+import { GraphQLFormattedError } from 'graphql'
 
 export const generateToken = (user: User) => {
   const token = jwt.sign(

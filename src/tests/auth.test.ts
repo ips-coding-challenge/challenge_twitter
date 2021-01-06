@@ -2,6 +2,7 @@ import { gql } from 'apollo-server'
 import knex from '../db/connection'
 import { testClient } from './setup'
 import { createUser } from './helpers'
+import { ValidationError } from 'class-validator'
 
 const REGISTER = gql`
   mutation($input: RegisterPayload!) {
@@ -66,7 +67,7 @@ test('it should not register a user if the username is incorrect', async () => {
 })
 
 test('it should not register a user if the email already exists', async () => {
-  const admin = await createUser()
+  await createUser('admin', 'admin@test.fr')
 
   const { mutate } = await testClient()
 
@@ -83,5 +84,15 @@ test('it should not register a user if the email already exists', async () => {
   })
 
   expect(res.errors).not.toBeNull()
+
+  const {
+    extensions: {
+      exception: { validationErrors },
+    },
+  }: any = res.errors![0]
+
+  expect((validationErrors[0] as ValidationError).constraints).toEqual({
+    UniqueConstraint: 'This email is already taken',
+  })
   expect(res.data).toBeNull()
 })
