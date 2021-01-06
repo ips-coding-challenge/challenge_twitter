@@ -9,9 +9,15 @@ class User {
   username: string
 
   @Field()
+  display_name: string
+
+  @Field()
   email: string
 
   password: string
+
+  @Field()
+  avatar?: string
 
   @Field()
   created_at: Date
