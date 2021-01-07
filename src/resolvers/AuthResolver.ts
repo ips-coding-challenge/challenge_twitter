@@ -1,5 +1,6 @@
 import {
   Arg,
+  Authorized,
   Ctx,
   Field,
   Mutation,
@@ -26,9 +27,13 @@ class AuthResponse {
 
 @Resolver()
 class AuthResolver {
-  @Query(() => String)
-  me() {
-    return 'Hello'
+  @Query(() => User)
+  @Authorized()
+  async me(@Ctx() ctx: MyContext) {
+    const { db, userId } = ctx
+    const [user] = await db('users').where('id', userId)
+
+    return user
   }
 
   @Mutation(() => AuthResponse)
