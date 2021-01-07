@@ -1,17 +1,17 @@
-import { ValidationError } from 'class-validator'
-import knex from '../db/connection'
-import { createUser } from './helpers'
-import { LOGIN, REGISTER } from './queries/auth.queries'
-import { testClient } from './setup'
+import { ValidationError } from 'apollo-server'
 import db from '../db/connection'
+import { generateToken } from '../utils/utils'
+import { createUser } from './helpers'
+import { LOGIN, ME, REGISTER } from './queries/auth.queries'
+import { testClient } from './setup'
 
 beforeEach(async () => {
-  await knex.migrate.rollback()
-  await knex.migrate.latest()
+  await db.migrate.rollback()
+  await db.migrate.latest()
 })
 
 afterEach(async () => {
-  await knex.migrate.rollback()
+  await db.migrate.rollback()
 })
 
 test('it should register a user', async () => {
@@ -34,9 +34,7 @@ test('it should register a user', async () => {
   expect(newUser).not.toBeUndefined
   expect(newUser.username).toEqual('admin')
 
-  const { token, user } = res.data.register
-  expect(token).not.toBeNull()
-  expect(user.username).toEqual('admin')
+  expect(res).toMatchSnapshot()
 })
 
 test('it should not register a user if the username is incorrect', async () => {
@@ -53,7 +51,7 @@ test('it should not register a user if the username is incorrect', async () => {
       },
     },
   })
-
+  expect(res).toMatchSnapshot()
   expect(res.data).toBeNull()
 })
 
@@ -160,4 +158,47 @@ it('should throw a validation error if the password is empty', async () => {
   expect((validationErrors[0] as ValidationError).constraints).toEqual({
     isNotEmpty: 'password should not be empty',
   })
+})
+
+test('it should fetch the currentUser', async () => {
+  const user = await createUser()
+
+  const { query } = await testClient({
+    req: { headers: { authorization: 'Bearer ' + generateToken(user) } },
+  })
+
+  const res = await query({
+    query: ME,
+  })
+
+  expect(res.data).not.toBeNull()
+  expect(+res.data.me.id).toEqual(user.id)
+})
+
+test('it should throw an unauthorized error if there is no token', async () => {
+  const user = await createUser()
+
+  const { query } = await testClient()
+
+  const res = await query({
+    query: ME,
+  })
+
+  console.log('res', res)
+
+  expect(res).toMatchSnapshot()
+})
+
+test('it should throw expired Token error', async () => {
+  const user = await createUser()
+
+  const { query } = await testClient({
+    req: { headers: { authorization: 'Bearer ' + generateToken(user, -60) } },
+  })
+
+  const res = await query({
+    query: ME,
+  })
+
+  expect(res).toMatchSnapshot()
 })

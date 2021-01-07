@@ -4,7 +4,10 @@ import { JWT_SECRET } from '../config/config'
 import User from '../entities/User'
 import InvalidTokenError from '../errors/InvalidTokenError'
 
-export const generateToken = (user: User) => {
+export const generateToken = (
+  user: User,
+  expiresIn: string | number | undefined = '7d'
+) => {
   const token = jwt.sign(
     {
       data: {
@@ -14,7 +17,7 @@ export const generateToken = (user: User) => {
       },
     },
     JWT_SECRET as string,
-    { expiresIn: '7d' } // 7 days
+    { expiresIn } // 7 days
   )
   return token
 }

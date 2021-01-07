@@ -5,19 +5,27 @@ import AuthResolver from './resolvers/AuthResolver'
 import db from './db/connection'
 import { authChecker } from './middlewares/authChecker'
 
+export const defaultContext = ({ req, res }: any) => {
+  return {
+    req,
+    res,
+    db,
+  }
+}
+
+export const schema = async () => {
+  return await buildSchema({
+    resolvers: [AuthResolver],
+    authChecker: authChecker,
+  })
+}
+
 const createServer = async () => {
   return new ApolloServer({
-    schema: await buildSchema({
-      resolvers: [AuthResolver],
-      authChecker: authChecker,
-    }),
-    context: ({ req, res }) => {
-      return {
-        req,
-        res,
-        db,
-      }
-    },
+    schema: await schema(),
+    context: defaultContext,
+    introspection: true,
+    playground: true,
   })
 }
 
