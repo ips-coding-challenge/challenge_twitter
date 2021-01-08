@@ -33,8 +33,6 @@ test('it should register a user', async () => {
 
   expect(newUser).not.toBeUndefined
   expect(newUser.username).toEqual('admin')
-
-  expect(res).toMatchSnapshot()
 })
 
 test('it should not register a user if the username is incorrect', async () => {
@@ -122,6 +120,8 @@ it('should throw a validation error if the email is invalid', async () => {
 
   expect(res.data).toBeNull()
   expect(res.errors).not.toBeNull()
+
+  expect(res.errors![0].extensions).toMatchSnapshot()
   const {
     extensions: {
       exception: { validationErrors },
@@ -149,6 +149,7 @@ it('should throw a validation error if the password is empty', async () => {
 
   expect(res.data).toBeNull()
   expect(res.errors).not.toBeNull()
+  expect(res.errors![0].extensions).toMatchSnapshot()
   const {
     extensions: {
       exception: { validationErrors },
@@ -183,8 +184,6 @@ test('it should throw an unauthorized error if there is no token', async () => {
   const res = await query({
     query: ME,
   })
-
-  console.log('res', res)
 
   expect(res).toMatchSnapshot()
 })

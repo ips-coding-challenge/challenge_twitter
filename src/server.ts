@@ -24,8 +24,6 @@ const createServer = async () => {
   return new ApolloServer({
     schema: await schema(),
     context: defaultContext,
-    introspection: true,
-    playground: true,
   })
 }
 

@@ -15,31 +15,6 @@ Object {
 }
 `;
 
-exports[`it should register a user 1`] = `
-Object {
-  "data": Object {
-    "register": Object {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwiZGlzcGxheV9uYW1lIjoiQWRtaW4ifSwiaWF0IjoxNjEwMDQ2NTMzLCJleHAiOjE2MTA2NTEzMzN9.bYEW28mdwBipi0AHiqh7M6gS362EBSQdB0u3fZq60Fs",
-      "user": Object {
-        "created_at": "2021-01-07T19:08:53.831Z",
-        "display_name": "Admin",
-        "email": "admin@test.fr",
-        "id": "1",
-        "updated_at": "2021-01-07T19:08:53.831Z",
-        "username": "admin",
-      },
-    },
-  },
-  "errors": undefined,
-  "extensions": undefined,
-  "http": Object {
-    "headers": Headers {
-      Symbol(map): Object {},
-    },
-  },
-}
-`;
-
 exports[`it should throw an unauthorized error if there is no token 1`] = `
 Object {
   "data": null,
@@ -66,6 +41,50 @@ Object {
     "headers": Headers {
       Symbol(map): Object {},
     },
+  },
+}
+`;
+
+exports[`should throw a validation error if the email is invalid 1`] = `
+Object {
+  "code": "INTERNAL_SERVER_ERROR",
+  "exception": Object {
+    "validationErrors": Array [
+      ValidationError {
+        "children": Array [],
+        "constraints": Object {
+          "isEmail": "email must be an email",
+        },
+        "property": "email",
+        "target": LoginPayload {
+          "email": "adminaz",
+          "password": "password",
+        },
+        "value": "adminaz",
+      },
+    ],
+  },
+}
+`;
+
+exports[`should throw a validation error if the password is empty 1`] = `
+Object {
+  "code": "INTERNAL_SERVER_ERROR",
+  "exception": Object {
+    "validationErrors": Array [
+      ValidationError {
+        "children": Array [],
+        "constraints": Object {
+          "isNotEmpty": "password should not be empty",
+        },
+        "property": "password",
+        "target": LoginPayload {
+          "email": "admin@test.fr",
+          "password": "",
+        },
+        "value": "",
+      },
+    ],
   },
 }
 `;
