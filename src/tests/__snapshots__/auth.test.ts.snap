@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it should not register a user if the username is incorrect 1`] = `
+Object {
+  "data": null,
+  "errors": Array [
+    [GraphQLError: Argument Validation Error],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`it should throw an unauthorized error if there is no token 1`] = `
+Object {
+  "data": null,
+  "errors": Array [
+    [GraphQLError: Unauthorized],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`it should throw expired Token error 1`] = `
+Object {
+  "data": null,
+  "errors": Array [
+    [GraphQLError: jwt expired],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
+exports[`should throw a validation error if the email is invalid 1`] = `
+Object {
+  "code": "INTERNAL_SERVER_ERROR",
+  "exception": Object {
+    "validationErrors": Array [
+      ValidationError {
+        "children": Array [],
+        "constraints": Object {
+          "isEmail": "email must be an email",
+        },
+        "property": "email",
+        "target": LoginPayload {
+          "email": "adminaz",
+          "password": "password",
+        },
+        "value": "adminaz",
+      },
+    ],
+  },
+}
+`;
+
+exports[`should throw a validation error if the password is empty 1`] = `
+Object {
+  "code": "INTERNAL_SERVER_ERROR",
+  "exception": Object {
+    "validationErrors": Array [
+      ValidationError {
+        "children": Array [],
+        "constraints": Object {
+          "isNotEmpty": "password should not be empty",
+        },
+        "property": "password",
+        "target": LoginPayload {
+          "email": "admin@test.fr",
+          "password": "",
+        },
+        "value": "",
+      },
+    ],
+  },
+}
+`;
