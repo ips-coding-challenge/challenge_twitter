@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`it should not register a user if the username is incorrect 1`] = `
+exports[`Auth it should not register a user if the username is incorrect 1`] = `
 Object {
   "data": null,
   "errors": Array [
@@ -15,7 +15,7 @@ Object {
 }
 `;
 
-exports[`it should throw an unauthorized error if there is no token 1`] = `
+exports[`Auth it should throw an unauthorized error if there is no token 1`] = `
 Object {
   "data": null,
   "errors": Array [
@@ -30,7 +30,7 @@ Object {
 }
 `;
 
-exports[`it should throw expired Token error 1`] = `
+exports[`Auth it should throw expired Token error 1`] = `
 Object {
   "data": null,
   "errors": Array [
@@ -45,7 +45,7 @@ Object {
 }
 `;
 
-exports[`should throw a validation error if the email is invalid 1`] = `
+exports[`Auth should throw a validation error if the email is invalid 1`] = `
 Object {
   "code": "INTERNAL_SERVER_ERROR",
   "exception": Object {
@@ -67,7 +67,7 @@ Object {
 }
 `;
 
-exports[`should throw a validation error if the password is empty 1`] = `
+exports[`Auth should throw a validation error if the password is empty 1`] = `
 Object {
   "code": "INTERNAL_SERVER_ERROR",
   "exception": Object {

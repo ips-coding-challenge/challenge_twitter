@@ -7,12 +7,13 @@
     "dev": "cross-env NODE_ENV=development nodemon src/index.ts --exec ts-node",
     "build": "shx rm -rf dist/ && tsc -p .",
     "start": "node dist/src/index.js",
-    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --bail --forceExit"
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --bail --forceExit --watchAll=false"
   },
   "dependencies": {
     "apollo-server": "^2.19.1",
     "argon2": "^0.27.1",
     "class-validator": "^0.12.2",
+    "dataloader": "^2.0.0",
     "dotenv": "^8.2.0",
     "graphql": "^15.4.0",
     "jsonwebtoken": "^8.5.1",
@@ -23,10 +24,12 @@
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
+    "@types/faker": "^5.1.5",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.14.20",
     "apollo-server-testing": "^2.19.1",
     "cross-env": "^7.0.3",
+    "faker": "^5.1.0",
     "jest": "^26.6.3",
     "knex-tiny-logger": "^2.0.0",
     "nodemon": "^2.0.6",
