@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tweets it should fetch the tweets with user 1`] = `
+Object {
+  "body": "Quam repellat quaerat.",
+  "id": "1",
+  "user": Object {
+    "display_name": "Violet",
+    "id": "1",
+    "username": "Casandra.Pouros31",
+  },
+  "visibility": "followers",
+}
+`;
