@@ -1,8 +1,10 @@
+import { ApolloError } from 'apollo-server'
 import {
   Arg,
   Authorized,
   Ctx,
   FieldResolver,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -41,14 +43,40 @@ class TweetResolver {
   ) {
     const { db, userId } = ctx
 
-    const [tweet] = await db('tweets')
-      .insert({
-        ...payload,
+    try {
+      const [tweet] = await db('tweets')
+        .insert({
+          ...payload,
+          user_id: userId,
+        })
+        .returning('*')
+
+      return tweet
+    } catch (e) {
+      throw new ApolloError(e.message)
+    }
+  }
+
+  @Mutation(() => Int)
+  @Authorized()
+  async deleteTweet(@Arg('id') id: number, @Ctx() ctx: MyContext) {
+    const { db, userId } = ctx
+
+    try {
+      const [tweet] = await db('tweets').where({
+        id,
         user_id: userId,
       })
-      .returning('*')
 
-    return tweet
+      if (!tweet) {
+        throw new ApolloError('Tweet not found')
+      }
+
+      // Return the number of affected rows
+      return await db('tweets').where({ id, user_id: userId }).del()
+    } catch (e) {
+      throw new ApolloError(e.message)
+    }
   }
 }
 
