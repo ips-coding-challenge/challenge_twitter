@@ -3,7 +3,7 @@ import User from './User'
 
 @ObjectType()
 class Tweet {
-  @Field((type) => ID)
+  @Field()
   id: number
 
   @Field()
