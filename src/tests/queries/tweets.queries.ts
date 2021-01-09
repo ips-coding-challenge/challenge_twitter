@@ -27,3 +27,8 @@ export const ADD_TWEET = gql`
     }
   }
 `
+export const DELETE_TWEET = gql`
+  mutation($id: Float!) {
+    deleteTweet(id: $id)
+  }
+`

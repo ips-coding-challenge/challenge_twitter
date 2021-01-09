@@ -1,7 +1,7 @@
 import db from '../db/connection'
 import { generateToken } from '../utils/utils'
 import { createTweet, createUser } from './helpers'
-import { ADD_TWEET, FEED } from './queries/tweets.queries'
+import { ADD_TWEET, FEED, DELETE_TWEET } from './queries/tweets.queries'
 import { testClient } from './setup'
 
 describe('Tweets', () => {
@@ -93,5 +93,60 @@ describe('Tweets', () => {
 
     expect(res.errors).not.toBeNull()
     expect(res.errors![0].message).toEqual('Argument Validation Error')
+  })
+
+  it('should delete a user s tweet', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user, 'First tweet')
+
+    const { mutate } = await testClient({
+      req: {
+        headers: { authorization: 'Bearer ' + generateToken(user) },
+      },
+    })
+
+    const res = await mutate({
+      mutation: DELETE_TWEET,
+      variables: {
+        id: tweet.id,
+      },
+    })
+
+    const [deletedTweet] = await db('tweets').where({
+      id: tweet.id,
+      user_id: user.id,
+    })
+
+    expect(deletedTweet).toBeUndefined()
+
+    expect(res.data.deleteTweet).toEqual(1)
+  })
+
+  it('should not delete a tweet that doesnt belong to the connected user', async () => {
+    const user = await createUser()
+    const another = await createUser('another', 'another@test.fr')
+    const tweet = await createTweet(user, 'First tweet')
+
+    const { mutate } = await testClient({
+      req: {
+        headers: { authorization: 'Bearer ' + generateToken(another) },
+      },
+    })
+
+    const res = await mutate({
+      mutation: DELETE_TWEET,
+      variables: {
+        id: tweet.id,
+      },
+    })
+
+    const [deletedTweet] = await db('tweets').where({
+      id: tweet.id,
+      user_id: user.id,
+    })
+
+    expect(deletedTweet).not.toBeUndefined()
+    expect(res.errors).not.toBeNull()
+    expect(res.errors![0].message).toEqual('Tweet not found')
   })
 })
