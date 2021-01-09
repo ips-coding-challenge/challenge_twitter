@@ -4,4 +4,6 @@
 
 You can find the challenge here [Twitter Challenge](https://devchallenges.io/challenges/rleoQc34THclWx1cFFKH)
 
-I will write the evolution of the project on dev.to. I'll put the link once I started writing the first article ;)
+I will write the evolution of the project on dev.to.
+
+[Twitter Challenge on dev.to](https://dev.to/ipscodingchallenge/part-1-creating-a-twitter-clone-with-graphql-knex-typescript-and-react-32i1)
