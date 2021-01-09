@@ -11,7 +11,11 @@ export const authChecker: AuthChecker<MyContext, string> = async ({
   context,
   info,
 }) => {
-  const { db, req } = <MyContext>context
+  const {
+    db,
+    req,
+    dataloaders: { userDataloader },
+  } = <MyContext>context
 
   try {
     const token = extractJwtToken(req)
@@ -19,7 +23,7 @@ export const authChecker: AuthChecker<MyContext, string> = async ({
       data: { id },
     }: any = jwt.verify(token, JWT_SECRET as string)
 
-    const [user] = await db('users').where('id', id)
+    const user = await userDataloader.load(id)
 
     if (!user) throw new AuthenticationError('User not found')
 

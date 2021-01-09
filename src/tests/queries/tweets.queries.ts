@@ -14,3 +14,16 @@ export const FEED = gql`
     }
   }
 `
+
+export const ADD_TWEET = gql`
+  mutation($payload: AddTweetPayload!) {
+    addTweet(payload: $payload) {
+      id
+      body
+      user {
+        id
+        username
+      }
+    }
+  }
+`

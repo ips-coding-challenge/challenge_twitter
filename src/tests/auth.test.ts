@@ -174,7 +174,7 @@ describe('Auth', () => {
     })
 
     expect(res.data).not.toBeNull()
-    expect(+res.data.me.id).toEqual(user.id)
+    expect(res.data.me.id).toEqual(user.id)
   })
 
   test('it should throw an unauthorized error if there is no token', async () => {

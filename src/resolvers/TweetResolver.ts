@@ -1,4 +1,14 @@
-import { Ctx, FieldResolver, Query, Resolver, Root } from 'type-graphql'
+import {
+  Arg,
+  Authorized,
+  Ctx,
+  FieldResolver,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from 'type-graphql'
+import AddTweetPayload from '../dto/AddTweetPayload'
 import Tweet from '../entities/Tweet'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
@@ -9,7 +19,7 @@ class TweetResolver {
   async feed(@Ctx() ctx: MyContext) {
     const { db } = ctx
 
-    const tweets = await db('tweets').limit(50)
+    const tweets = await db('tweets').orderBy('id', 'desc').limit(50)
 
     return tweets
   }
@@ -21,6 +31,24 @@ class TweetResolver {
     } = ctx
 
     return await userDataloader.load(tweet.user_id)
+  }
+
+  @Mutation(() => Tweet)
+  @Authorized()
+  async addTweet(
+    @Arg('payload') payload: AddTweetPayload,
+    @Ctx() ctx: MyContext
+  ) {
+    const { db, userId } = ctx
+
+    const [tweet] = await db('tweets')
+      .insert({
+        ...payload,
+        user_id: userId,
+      })
+      .returning('*')
+
+    return tweet
   }
 }
 
