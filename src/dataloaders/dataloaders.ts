@@ -8,4 +8,14 @@ export const dataloaders = {
 
     return ids.map((id) => users.find((u) => u.id === id))
   }),
+  // Get the likesCount for each tweet
+  likesCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
+    const counts = await db('likes')
+      .whereIn('tweet_id', ids)
+      .count('tweet_id', { as: 'likesCount' })
+      .select('tweet_id')
+      .groupBy('tweet_id')
+
+    return ids.map((id) => counts.find((c) => c.tweet_id === id))
+  }),
 }

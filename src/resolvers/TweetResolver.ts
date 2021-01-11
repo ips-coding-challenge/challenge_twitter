@@ -35,6 +35,15 @@ class TweetResolver {
     return await userDataloader.load(tweet.user_id)
   }
 
+  @FieldResolver(() => Int)
+  async likesCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { likesCountDataloader },
+    } = ctx
+    const count = await likesCountDataloader.load(tweet.id)
+    return count?.likesCount || 0
+  }
+
   @Mutation(() => Tweet)
   @Authorized()
   async addTweet(

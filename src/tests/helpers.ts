@@ -1,6 +1,7 @@
 import db from '../db/connection'
 import argon2 from 'argon2'
 import User from '../entities/User'
+import Tweet from '../entities/Tweet'
 
 export const createUser = async (
   username = 'admin',
@@ -37,4 +38,15 @@ export const createTweet = async (
     .returning('*')
 
   return tweet
+}
+
+export const createLike = async (user: User, tweet: Tweet) => {
+  const [like] = await db('likes')
+    .insert({
+      user_id: user.id,
+      tweet_id: tweet.id,
+    })
+    .returning('*')
+
+  return like
 }
