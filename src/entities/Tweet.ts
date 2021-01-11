@@ -21,7 +21,10 @@ class Tweet {
   user_id: number
 
   @Field()
-  likesCount: number
+  likes_count: number
+
+  @Field()
+  isLiked: boolean
 
   @Field()
   created_at: Date
