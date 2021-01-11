@@ -21,6 +21,9 @@ class Tweet {
   user_id: number
 
   @Field()
+  likesCount: number
+
+  @Field()
   created_at: Date
 
   @Field()

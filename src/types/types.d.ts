@@ -9,5 +9,6 @@ export type MyContext = {
   userId: number
   dataloaders: {
     userDataloader: DataLoader<number, User, unknown>
+    likesCountDataloader: DataLoader<number, any, unknown>
   }
 }

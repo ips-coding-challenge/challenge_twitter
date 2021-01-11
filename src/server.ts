@@ -6,6 +6,7 @@ import db from './db/connection'
 import { authChecker } from './middlewares/authChecker'
 import TweetResolver from './resolvers/TweetResolver'
 import { dataloaders } from './dataloaders/dataloaders'
+import LikeResolver from './resolvers/LikeResolver'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -18,7 +19,7 @@ export const defaultContext = ({ req, res }: any) => {
 
 export const schema = async () => {
   return await buildSchema({
-    resolvers: [AuthResolver, TweetResolver],
+    resolvers: [AuthResolver, TweetResolver, LikeResolver],
     authChecker: authChecker,
   })
 }
