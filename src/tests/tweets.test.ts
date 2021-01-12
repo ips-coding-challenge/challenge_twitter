@@ -44,6 +44,8 @@ describe('Tweets', () => {
       },
     })
 
+    console.log('res', res)
+
     const newTweet = await db('tweets')
 
     expect(newTweet.length).toEqual(1)
@@ -149,4 +151,44 @@ describe('Tweets', () => {
     expect(res.errors).not.toBeNull()
     expect(res.errors![0].message).toEqual('Tweet not found')
   })
+
+  it('should insert a comment', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          type: 'comment',
+          parent_id: tweet.id,
+        },
+      },
+    })
+
+    console.log('res', res.data)
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(2)
+
+    expect(res.data.addTweet.body).toEqual('Bouh')
+    expect(res.data.addTweet.type).toEqual('comment')
+    expect(res.data.addTweet.parent_id).toEqual(tweet.id)
+    expect(res.errors).toBeUndefined()
+  })
+  // it('should insert a retweet', async () => {})
+  // it('should not insert a comment if not parent_id is provided', async () => {})
+  // it('should not insert a comment if the type is not provided', async () => {})
+  // it('should not insert a retweet if not parent_id is provided', async () => {})
+  // it('should not insert a retweet if the type is not provided', async () => {})
+  // it('should not insert a retweet if the user already retweeted the tweet', async () => {})
 })
