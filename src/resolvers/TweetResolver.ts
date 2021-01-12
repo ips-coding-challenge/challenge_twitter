@@ -21,15 +21,7 @@ class TweetResolver {
   async feed(@Ctx() ctx: MyContext) {
     const { db } = ctx
 
-    const tweets = await db('tweets')
-      .select([
-        'tweets.*',
-        db.raw(
-          '(select count(tweet_id) from likes where tweet_id = tweets.id) as likes_count'
-        ),
-      ])
-      .orderBy('id', 'desc')
-      .limit(20)
+    const tweets = await db('tweets').orderBy('id', 'desc').limit(20)
 
     return tweets
   }
@@ -43,14 +35,14 @@ class TweetResolver {
     return await userDataloader.load(tweet.user_id)
   }
 
-  // @FieldResolver(() => Int)
-  // async likesCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-  //   const {
-  //     dataloaders: { likesCountDataloader },
-  //   } = ctx
-  //   const count = await likesCountDataloader.load(tweet.id)
-  //   return count?.likesCount || 0
-  // }
+  @FieldResolver(() => Int)
+  async likesCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { likesCountDataloader },
+    } = ctx
+    const count = await likesCountDataloader.load(tweet.id)
+    return count?.likesCount || 0
+  }
 
   @FieldResolver(() => Boolean)
   @Authorized('ANONYMOUS')

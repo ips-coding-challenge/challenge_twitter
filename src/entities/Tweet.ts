@@ -21,7 +21,7 @@ class Tweet {
   user_id: number
 
   @Field()
-  likes_count: number
+  likesCount: number
 
   @Field()
   isLiked: boolean
