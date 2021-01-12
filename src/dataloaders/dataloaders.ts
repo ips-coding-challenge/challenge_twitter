@@ -18,4 +18,13 @@ export const dataloaders = {
 
     return ids.map((id) => counts.find((c) => c.tweet_id === id))
   }),
+  isLikedDataloader: new DataLoader<any, any, unknown>(async (keys) => {
+    const tweetIds = keys.map((k: any) => k.tweet_id)
+    const userId = keys[0].user_id
+
+    const likes = await db('likes')
+      .whereIn('tweet_id', tweetIds)
+      .andWhere('user_id', userId)
+    return tweetIds.map((id) => likes.find((l) => l.tweet_id === id))
+  }),
 }

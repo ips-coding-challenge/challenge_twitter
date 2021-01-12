@@ -24,6 +24,9 @@ class Tweet {
   likesCount: number
 
   @Field()
+  isLiked: boolean
+
+  @Field()
   created_at: Date
 
   @Field()
