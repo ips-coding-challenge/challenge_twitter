@@ -26,7 +26,8 @@ export const createTweet = async (
   user: User,
   body = 'A tweet',
   type = 'tweet',
-  visibility = 'public'
+  visibility = 'public',
+  parent_id = null
 ) => {
   const [tweet] = await db('tweets')
     .insert({
@@ -34,6 +35,7 @@ export const createTweet = async (
       user_id: user.id,
       type,
       visibility,
+      parent_id,
     })
     .returning('*')
 

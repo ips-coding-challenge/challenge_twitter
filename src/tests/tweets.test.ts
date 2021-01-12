@@ -1,3 +1,4 @@
+import { ValidationError } from 'apollo-server'
 import db from '../db/connection'
 import { generateToken } from '../utils/utils'
 import { createTweet, createUser } from './helpers'
@@ -43,8 +44,6 @@ describe('Tweets', () => {
         payload: { body: 'First tweet' },
       },
     })
-
-    console.log('res', res)
 
     const newTweet = await db('tweets')
 
@@ -174,8 +173,6 @@ describe('Tweets', () => {
       },
     })
 
-    console.log('res', res.data)
-
     const tweets = await db('tweets')
 
     expect(tweets.length).toEqual(2)
@@ -185,10 +182,211 @@ describe('Tweets', () => {
     expect(res.data.addTweet.parent_id).toEqual(tweet.id)
     expect(res.errors).toBeUndefined()
   })
-  // it('should insert a retweet', async () => {})
-  // it('should not insert a comment if not parent_id is provided', async () => {})
-  // it('should not insert a comment if the type is not provided', async () => {})
-  // it('should not insert a retweet if not parent_id is provided', async () => {})
-  // it('should not insert a retweet if the type is not provided', async () => {})
-  // it('should not insert a retweet if the user already retweeted the tweet', async () => {})
+  it('should insert a retweet', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          type: 'retweet',
+          parent_id: tweet.id,
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(2)
+
+    expect(res.data.addTweet.body).toEqual('Bouh')
+    expect(res.data.addTweet.type).toEqual('retweet')
+    expect(res.data.addTweet.parent_id).toEqual(tweet.id)
+    expect(res.errors).toBeUndefined()
+  })
+  it('should not insert a comment if the type is provided but the parent_id is not provided', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          type: 'comment',
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(1)
+
+    expect(res.errors).not.toBeUndefined()
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isNotEmpty: 'parent_id should not be empty',
+    })
+  })
+  it('should not insert a comment if the parent_id is provided but the type is not provided', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          parent_id: tweet.id,
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(1)
+
+    expect(res.errors).not.toBeUndefined()
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isIn: 'type must be one of the following values: comment,retweet',
+    })
+  })
+  it('should not insert a retweet if the type is provided but not the parent_id', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          type: 'retweet',
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(1)
+
+    expect(res.errors).not.toBeUndefined()
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isNotEmpty: 'parent_id should not be empty',
+    })
+  })
+  it('should not insert a retweet if the parent_id is provided but not the type', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          parent_id: tweet.id,
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(1)
+
+    expect(res.errors).not.toBeUndefined()
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isIn: 'type must be one of the following values: comment,retweet',
+    })
+  })
+  it('should not insert a retweet if the user already retweeted the tweet', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+    const retweet = await createTweet(
+      user,
+      'test',
+      'retweet',
+      'public',
+      tweet.id
+    )
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          type: 'retweet',
+          parent_id: tweet.id,
+        },
+      },
+    })
+
+    expect(res.errors).not.toBeUndefined()
+    expect(res.errors![0].message).toEqual('You already retweeted that tweet')
+  })
 })
