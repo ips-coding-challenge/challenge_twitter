@@ -20,6 +20,8 @@ export const ADD_TWEET = gql`
     addTweet(payload: $payload) {
       id
       body
+      type
+      parent_id
       user {
         id
         username

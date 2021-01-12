@@ -1,6 +1,17 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 import User from './User'
 
+export enum TweetTypeEnum {
+  TWEET = 'tweet',
+  RETWEET = 'retweet',
+  COMMENT = 'comment',
+}
+
+export enum TweetVisibilityEnum {
+  PUBLIC = 'public',
+  FOLLOWERS = 'followers',
+}
+
 @ObjectType()
 class Tweet {
   @Field()
@@ -10,10 +21,13 @@ class Tweet {
   body: string
 
   @Field()
-  visibility: string
+  visibility: TweetVisibilityEnum
+
+  @Field({ nullable: true })
+  parent_id?: number
 
   @Field()
-  type: string
+  type: TweetTypeEnum
 
   @Field()
   user: User

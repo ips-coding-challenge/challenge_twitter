@@ -11,7 +11,7 @@ import {
   Root,
 } from 'type-graphql'
 import AddTweetPayload from '../dto/AddTweetPayload'
-import Tweet from '../entities/Tweet'
+import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
 
@@ -69,6 +69,30 @@ class TweetResolver {
     @Ctx() ctx: MyContext
   ) {
     const { db, userId } = ctx
+    const { body, type, parent_id } = payload
+
+    // Maybe I should add a mutation to handle the retweet?
+    // For the comment, we can comment as much as we want so I could
+    // still add the comment here.
+    // Feel free to share your opinion ;)
+    if (type === TweetTypeEnum.RETWEET && parent_id) {
+      const [alreadyRetweeted] = await db('tweets').where({
+        parent_id: parent_id,
+        type: TweetTypeEnum.RETWEET,
+        user_id: userId,
+      })
+
+      if (alreadyRetweeted) {
+        throw new ApolloError('You already retweeted that tweet')
+      }
+    }
+
+    if (parent_id) {
+      const [tweetExists] = await db('tweets').where('id', parent_id)
+      if (!tweetExists) {
+        throw new ApolloError('Tweet not found')
+      }
+    }
 
     try {
       const [tweet] = await db('tweets')
