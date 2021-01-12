@@ -35,6 +35,24 @@ class TweetResolver {
     return await userDataloader.load(tweet.user_id)
   }
 
+  @FieldResolver(() => [Tweet])
+  async retweets(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { retweetsDataloader },
+    } = ctx
+
+    return await retweetsDataloader.load(tweet.id)
+  }
+
+  @FieldResolver(() => [Tweet])
+  async comments(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { commentsDataloader },
+    } = ctx
+
+    return await commentsDataloader.load(tweet.id)
+  }
+
   @FieldResolver(() => Int)
   async likesCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
@@ -42,6 +60,24 @@ class TweetResolver {
     } = ctx
     const count = await likesCountDataloader.load(tweet.id)
     return count?.likesCount || 0
+  }
+
+  @FieldResolver(() => Int)
+  async retweetsCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { retweetsCountDataloader },
+    } = ctx
+    const count = await retweetsCountDataloader.load(tweet.id)
+    return count?.retweetsCount || 0
+  }
+
+  @FieldResolver(() => Int)
+  async commentsCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { commentsCountDataloader },
+    } = ctx
+    const count = await commentsCountDataloader.load(tweet.id)
+    return count?.commentsCount || 0
   }
 
   @FieldResolver(() => Boolean)
@@ -68,7 +104,16 @@ class TweetResolver {
     @Arg('payload') payload: AddTweetPayload,
     @Ctx() ctx: MyContext
   ) {
-    const { db, userId } = ctx
+    const {
+      db,
+      userId,
+      dataloaders: {
+        retweetsCountDataloader,
+        commentsCountDataloader,
+        retweetsDataloader,
+        commentsDataloader,
+      },
+    } = ctx
     const { body, type, parent_id } = payload
 
     // Maybe I should add a mutation to handle the retweet?
@@ -101,6 +146,14 @@ class TweetResolver {
           user_id: userId,
         })
         .returning('*')
+
+      if (type === TweetTypeEnum.RETWEET) {
+        retweetsCountDataloader.clear(tweet.parent_id)
+        retweetsDataloader.clear(tweet.parent_id)
+      } else if (type === TweetTypeEnum.COMMENT) {
+        commentsDataloader.clear(tweet.parent_id)
+        commentsCountDataloader.clear(tweet.parent_id)
+      }
 
       return tweet
     } catch (e) {

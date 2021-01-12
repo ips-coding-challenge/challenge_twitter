@@ -34,6 +34,18 @@ class Tweet {
 
   user_id: number
 
+  @Field(() => [Tweet])
+  comments: []
+
+  @Field()
+  retweetsCount: number
+
+  @Field(() => [Tweet])
+  retweets: []
+
+  @Field()
+  commentsCount: number
+
   @Field()
   likesCount: number
 
