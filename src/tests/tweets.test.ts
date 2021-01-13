@@ -1,5 +1,6 @@
 import { ValidationError } from 'apollo-server'
 import db from '../db/connection'
+import { TweetTypeEnum } from '../entities/Tweet'
 import { generateToken } from '../utils/utils'
 import { createTweet, createUser } from './helpers'
 import { ADD_TWEET, FEED, DELETE_TWEET } from './queries/tweets.queries'
@@ -246,7 +247,7 @@ describe('Tweets', () => {
     }: any = res.errors![0]
 
     expect((validationErrors[0] as ValidationError).constraints).toEqual({
-      isNotEmpty: 'parent_id should not be empty',
+      isDefined: 'parent_id should not be null or undefined',
     })
   })
   it('should not insert a comment if the parent_id is provided but the type is not provided', async () => {
@@ -282,7 +283,7 @@ describe('Tweets', () => {
     }: any = res.errors![0]
 
     expect((validationErrors[0] as ValidationError).constraints).toEqual({
-      isIn: 'type must be one of the following values: comment,retweet',
+      isDefined: 'type should not be null or undefined',
     })
   })
   it('should not insert a retweet if the type is provided but not the parent_id', async () => {
@@ -318,7 +319,7 @@ describe('Tweets', () => {
     }: any = res.errors![0]
 
     expect((validationErrors[0] as ValidationError).constraints).toEqual({
-      isNotEmpty: 'parent_id should not be empty',
+      isDefined: 'parent_id should not be null or undefined',
     })
   })
   it('should not insert a retweet if the parent_id is provided but not the type', async () => {
@@ -338,6 +339,44 @@ describe('Tweets', () => {
         payload: {
           body: 'Bouh',
           parent_id: tweet.id,
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+
+    expect(tweets.length).toEqual(1)
+
+    expect(res.errors).not.toBeUndefined()
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isDefined: 'type should not be null or undefined',
+    })
+  })
+
+  it('should not insert a retweet if the parent_id is provided but and the type is set to tweet', async () => {
+    const user = await createUser()
+    const tweet = await createTweet(user)
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          parent_id: tweet.id,
+          type: 'tweet',
         },
       },
     })

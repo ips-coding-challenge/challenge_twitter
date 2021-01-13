@@ -1,5 +1,6 @@
 import DataLoader from 'dataloader'
 import db from '../db/connection'
+import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
 
 export const dataloaders = {
@@ -26,5 +27,30 @@ export const dataloaders = {
       .whereIn('tweet_id', tweetIds)
       .andWhere('user_id', userId)
     return tweetIds.map((id) => likes.find((l) => l.tweet_id === id))
+  }),
+  retweetsCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
+    const counts = await db('tweets')
+      .whereIn('parent_id', ids)
+      .andWhere('type', TweetTypeEnum.RETWEET)
+      .count('parent_id', { as: 'retweetsCount' })
+      .select('parent_id')
+      .groupBy('parent_id')
+
+    return ids.map((id) => counts.find((c) => c.parent_id === id))
+  }),
+  commentsCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
+    const counts = await db('tweets')
+      .whereIn('parent_id', ids)
+      .andWhere('type', TweetTypeEnum.COMMENT)
+      .count('parent_id', { as: 'commentsCount' })
+      .select('parent_id')
+      .groupBy('parent_id')
+
+    return ids.map((id) => counts.find((c) => c.parent_id === id))
+  }),
+  parentTweetDataloader: new DataLoader<number, Tweet, unknown>(async (ids) => {
+    const parents = await db('tweets').whereIn('id', ids)
+
+    return ids.map((id) => parents.find((p) => p.id === id))
   }),
 }
