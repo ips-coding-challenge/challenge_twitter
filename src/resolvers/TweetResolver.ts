@@ -18,10 +18,21 @@ import { MyContext } from '../types/types'
 @Resolver((of) => Tweet)
 class TweetResolver {
   @Query(() => [Tweet])
+  @Authorized()
   async feed(@Ctx() ctx: MyContext) {
-    const { db } = ctx
+    const { db, userId } = ctx
 
-    const tweets = await db('tweets').orderBy('id', 'desc').limit(20)
+    const followedUsers = await db('followers')
+      .where({
+        follower_id: userId,
+      })
+      .pluck('following_id')
+
+    const tweets = await db('tweets')
+      .whereIn('user_id', followedUsers)
+      .orWhere('user_id', userId)
+      .orderBy('id', 'desc')
+      .limit(20)
 
     return tweets
   }

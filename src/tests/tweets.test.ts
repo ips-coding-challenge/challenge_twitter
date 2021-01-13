@@ -20,7 +20,13 @@ describe('Tweets', () => {
     const user = await createUser()
     const tweet = await createTweet(user, 'First tweet')
 
-    const { query } = await testClient()
+    const { query } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
 
     const res = await query({
       query: FEED,
