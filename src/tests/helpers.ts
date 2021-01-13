@@ -52,3 +52,10 @@ export const createLike = async (user: User, tweet: Tweet) => {
 
   return like
 }
+
+export const followUser = async (user: User, following: User) => {
+  await db('followers').insert({
+    follower_id: user.id,
+    following_id: following.id,
+  })
+}

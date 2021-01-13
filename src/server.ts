@@ -7,6 +7,7 @@ import { authChecker } from './middlewares/authChecker'
 import TweetResolver from './resolvers/TweetResolver'
 import { dataloaders } from './dataloaders/dataloaders'
 import LikeResolver from './resolvers/LikeResolver'
+import FollowerResolver from './resolvers/FollowerResolver'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -19,7 +20,7 @@ export const defaultContext = ({ req, res }: any) => {
 
 export const schema = async () => {
   return await buildSchema({
-    resolvers: [AuthResolver, TweetResolver, LikeResolver],
+    resolvers: [AuthResolver, TweetResolver, LikeResolver, FollowerResolver],
     authChecker: authChecker,
   })
 }
