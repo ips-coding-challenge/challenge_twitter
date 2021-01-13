@@ -26,6 +26,18 @@ class TweetResolver {
     return tweets
   }
 
+  @Query(() => [Tweet])
+  async comments(@Arg('parent_id') parent_id: number, @Ctx() ctx: MyContext) {
+    const { db } = ctx
+
+    const comments = await db('tweets').where({
+      parent_id,
+      type: TweetTypeEnum.COMMENT,
+    })
+
+    return comments
+  }
+
   @FieldResolver(() => User)
   async user(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
@@ -35,22 +47,15 @@ class TweetResolver {
     return await userDataloader.load(tweet.user_id)
   }
 
-  @FieldResolver(() => [Tweet])
-  async retweets(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+  @FieldResolver(() => Tweet, { nullable: true })
+  async parent(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
-      dataloaders: { retweetsDataloader },
+      dataloaders: { parentTweetDataloader },
     } = ctx
 
-    return await retweetsDataloader.load(tweet.id)
-  }
+    if (!tweet.parent_id) return null
 
-  @FieldResolver(() => [Tweet])
-  async comments(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      dataloaders: { commentsDataloader },
-    } = ctx
-
-    return await commentsDataloader.load(tweet.id)
+    return await parentTweetDataloader.load(tweet.parent_id!)
   }
 
   @FieldResolver(() => Int)
@@ -107,12 +112,7 @@ class TweetResolver {
     const {
       db,
       userId,
-      dataloaders: {
-        retweetsCountDataloader,
-        commentsCountDataloader,
-        retweetsDataloader,
-        commentsDataloader,
-      },
+      dataloaders: { retweetsCountDataloader, commentsCountDataloader },
     } = ctx
     const { body, type, parent_id } = payload
 
@@ -149,9 +149,7 @@ class TweetResolver {
 
       if (type === TweetTypeEnum.RETWEET) {
         retweetsCountDataloader.clear(tweet.parent_id)
-        retweetsDataloader.clear(tweet.parent_id)
       } else if (type === TweetTypeEnum.COMMENT) {
-        commentsDataloader.clear(tweet.parent_id)
         commentsCountDataloader.clear(tweet.parent_id)
       }
 
@@ -164,7 +162,11 @@ class TweetResolver {
   @Mutation(() => Int)
   @Authorized()
   async deleteTweet(@Arg('id') id: number, @Ctx() ctx: MyContext) {
-    const { db, userId } = ctx
+    const {
+      db,
+      userId,
+      dataloaders: { retweetsCountDataloader, commentsCountDataloader },
+    } = ctx
 
     try {
       const [tweet] = await db('tweets').where({
@@ -174,6 +176,14 @@ class TweetResolver {
 
       if (!tweet) {
         throw new ApolloError('Tweet not found')
+      }
+
+      if (tweet.parent_id) {
+        if (tweet.type === TweetTypeEnum.COMMENT) {
+          commentsCountDataloader.clear(tweet.parent_id)
+        } else if (tweet.type === TweetTypeEnum.RETWEET) {
+          retweetsCountDataloader.clear(tweet.parent_id)
+        }
       }
 
       // Return the number of affected rows

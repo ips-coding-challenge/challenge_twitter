@@ -14,7 +14,6 @@ export type MyContext = {
     isLikedDataloader: DataLoader<any, any, unknown>
     retweetsCountDataloader: DataLoader<number, any, unknown>
     commentsCountDataloader: DataLoader<number, any, unknown>
-    retweetsDataloader: DataLoader<number, Tweet[], unknown>
-    commentsDataloader: DataLoader<number, Tweet[], unknown>
+    parentTweetDataloader: DataLoader<number, Tweet, unknown>
   }
 }

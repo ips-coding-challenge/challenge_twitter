@@ -6,6 +6,9 @@ export const FEED = gql`
       id
       body
       visibility
+      likesCount
+      commentsCount
+      retweetsCount
       user {
         id
         username

@@ -21,9 +21,6 @@ export const schema = async () => {
   return await buildSchema({
     resolvers: [AuthResolver, TweetResolver, LikeResolver],
     authChecker: authChecker,
-    validate: {
-      skipMissingProperties: false,
-    },
   })
 }
 

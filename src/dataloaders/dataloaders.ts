@@ -48,18 +48,9 @@ export const dataloaders = {
 
     return ids.map((id) => counts.find((c) => c.parent_id === id))
   }),
-  retweetsDataloader: new DataLoader<number, Tweet[], unknown>(async (ids) => {
-    const retweets = await db('tweets')
-      .whereIn('parent_id', ids)
-      .andWhere('type', TweetTypeEnum.RETWEET)
+  parentTweetDataloader: new DataLoader<number, Tweet, unknown>(async (ids) => {
+    const parents = await db('tweets').whereIn('id', ids)
 
-    return ids.map((id) => retweets.filter((r) => r.parent_id === id))
-  }),
-  commentsDataloader: new DataLoader<number, Tweet[], unknown>(async (ids) => {
-    const comments = await db('tweets')
-      .whereIn('parent_id', ids)
-      .andWhere('type', TweetTypeEnum.COMMENT)
-
-    return ids.map((id) => comments.filter((c) => c.parent_id === id))
+    return ids.map((id) => parents.find((p) => p.id === id))
   }),
 }

@@ -1,4 +1,10 @@
-import { IsIn, IsNotEmpty, MinLength, ValidateIf } from 'class-validator'
+import {
+  IsDefined,
+  IsIn,
+  IsNotEmpty,
+  MinLength,
+  ValidateIf,
+} from 'class-validator'
 import { Field, InputType, Int } from 'type-graphql'
 import { TweetTypeEnum } from '../entities/Tweet'
 
@@ -11,11 +17,12 @@ class AddTweetPayload {
 
   @Field(() => Int, { nullable: true })
   @ValidateIf((o) => o.type !== undefined)
-  @IsNotEmpty()
+  @IsDefined()
   parent_id?: number
 
   @Field(() => String, { nullable: true })
   @ValidateIf((o) => o.parent_id !== undefined)
+  @IsDefined()
   @IsIn([TweetTypeEnum.COMMENT, TweetTypeEnum.RETWEET])
   type?: TweetTypeEnum
 

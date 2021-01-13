@@ -23,6 +23,9 @@ class Tweet {
   @Field()
   visibility: TweetVisibilityEnum
 
+  @Field(() => Tweet, { nullable: true })
+  parent?: Tweet
+
   @Field({ nullable: true })
   parent_id?: number
 
@@ -34,14 +37,8 @@ class Tweet {
 
   user_id: number
 
-  @Field(() => [Tweet])
-  comments: []
-
   @Field()
   retweetsCount: number
-
-  @Field(() => [Tweet])
-  retweets: []
 
   @Field()
   commentsCount: number
