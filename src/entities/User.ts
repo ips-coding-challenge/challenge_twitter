@@ -19,6 +19,12 @@ class User {
   @Field()
   avatar?: string
 
+  @Field({ nullable: true })
+  bio?: string
+
+  @Field({ nullable: true })
+  banner?: string
+
   @Field()
   created_at: Date
 
