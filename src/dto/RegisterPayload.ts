@@ -5,15 +5,18 @@ import { Unique } from '../validators/Unique'
 @InputType()
 class RegisterPayload {
   @Field()
-  @Matches(/^[a-zA-Z0-9_]{2,30}$/, {
+  @Matches(/^[\w]{2,30}$/, {
     message:
-      'The username should only contains alphanumeric characters and should have a length between 2 to 30',
+      'The username should only contains alphanumeric characters, underscores and should have a length between 2 to 30',
   })
   @Unique('users', { message: 'This username is already taken' })
   username: string
 
   @Field()
-  @MinLength(2)
+  @Matches(/^[\w\s]{2,30}$/, {
+    message:
+      'The display name should only contains alphanumeric characters, spaces, underscores and should have a length between 2 to 30',
+  })
   display_name: string
 
   @Field()
