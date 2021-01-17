@@ -33,18 +33,7 @@ class TweetResolver {
       .whereIn('user_id', followedUsers)
       .orWhere('user_id', userId)
       .orderBy('id', 'desc')
-      .select([
-        db.raw(
-          '(SELECT count(tweet_id) from likes where likes.tweet_id = tweets.id) as "likesCount"'
-        ),
-        db.raw(
-          `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'comment') as "commentsCount"`
-        ),
-        db.raw(
-          `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'retweet') as "retweetsCount"`
-        ),
-        'tweets.*',
-      ])
+      .select(selectCountsForTweet(db))
       .limit(20)
 
     return tweets

@@ -22,7 +22,8 @@ export const dataloaders = {
   parentTweetDataloader: new DataLoader<number, Tweet, unknown>(async (ids) => {
     const parents = await db('tweets')
       .whereIn('id', ids)
-      .select([selectCountsForTweet(db), 'tweets.*'])
+      .select(selectCountsForTweet(db))
+    // .select([selectCountsForTweet(db), 'tweets.*'])
 
     return ids.map((id) => parents.find((p) => p.id === id))
   }),
