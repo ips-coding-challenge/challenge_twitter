@@ -2,22 +2,13 @@ import DataLoader from 'dataloader'
 import db from '../db/connection'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
+import { selectCountsForTweet } from '../utils/utils'
 
 export const dataloaders = {
   userDataloader: new DataLoader<number, User, unknown>(async (ids) => {
     const users = await db('users').whereIn('id', ids)
 
     return ids.map((id) => users.find((u) => u.id === id))
-  }),
-  // Get the likesCount for each tweet
-  likesCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
-    const counts = await db('likes')
-      .whereIn('tweet_id', ids)
-      .count('tweet_id', { as: 'likesCount' })
-      .select('tweet_id')
-      .groupBy('tweet_id')
-
-    return ids.map((id) => counts.find((c) => c.tweet_id === id))
   }),
   isLikedDataloader: new DataLoader<any, any, unknown>(async (keys) => {
     const tweetIds = keys.map((k: any) => k.tweet_id)
@@ -28,28 +19,10 @@ export const dataloaders = {
       .andWhere('user_id', userId)
     return tweetIds.map((id) => likes.find((l) => l.tweet_id === id))
   }),
-  retweetsCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
-    const counts = await db('tweets')
-      .whereIn('parent_id', ids)
-      .andWhere('type', TweetTypeEnum.RETWEET)
-      .count('parent_id', { as: 'retweetsCount' })
-      .select('parent_id')
-      .groupBy('parent_id')
-
-    return ids.map((id) => counts.find((c) => c.parent_id === id))
-  }),
-  commentsCountDataloader: new DataLoader<number, any, unknown>(async (ids) => {
-    const counts = await db('tweets')
-      .whereIn('parent_id', ids)
-      .andWhere('type', TweetTypeEnum.COMMENT)
-      .count('parent_id', { as: 'commentsCount' })
-      .select('parent_id')
-      .groupBy('parent_id')
-
-    return ids.map((id) => counts.find((c) => c.parent_id === id))
-  }),
   parentTweetDataloader: new DataLoader<number, Tweet, unknown>(async (ids) => {
-    const parents = await db('tweets').whereIn('id', ids)
+    const parents = await db('tweets')
+      .whereIn('id', ids)
+      .select([selectCountsForTweet(db), 'tweets.*'])
 
     return ids.map((id) => parents.find((p) => p.id === id))
   }),

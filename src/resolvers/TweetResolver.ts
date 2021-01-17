@@ -14,6 +14,7 @@ import AddTweetPayload from '../dto/AddTweetPayload'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
+import { selectCountsForTweet } from '../utils/utils'
 
 @Resolver((of) => Tweet)
 class TweetResolver {
@@ -32,6 +33,18 @@ class TweetResolver {
       .whereIn('user_id', followedUsers)
       .orWhere('user_id', userId)
       .orderBy('id', 'desc')
+      .select([
+        db.raw(
+          '(SELECT count(tweet_id) from likes where likes.tweet_id = tweets.id) as "likesCount"'
+        ),
+        db.raw(
+          `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'comment') as "commentsCount"`
+        ),
+        db.raw(
+          `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'retweet') as "retweetsCount"`
+        ),
+        'tweets.*',
+      ])
       .limit(20)
 
     return tweets
@@ -67,33 +80,6 @@ class TweetResolver {
     if (!tweet.parent_id) return null
 
     return await parentTweetDataloader.load(tweet.parent_id!)
-  }
-
-  @FieldResolver(() => Int)
-  async likesCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      dataloaders: { likesCountDataloader },
-    } = ctx
-    const count = await likesCountDataloader.load(tweet.id)
-    return count?.likesCount || 0
-  }
-
-  @FieldResolver(() => Int)
-  async retweetsCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      dataloaders: { retweetsCountDataloader },
-    } = ctx
-    const count = await retweetsCountDataloader.load(tweet.id)
-    return count?.retweetsCount || 0
-  }
-
-  @FieldResolver(() => Int)
-  async commentsCount(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      dataloaders: { commentsCountDataloader },
-    } = ctx
-    const count = await commentsCountDataloader.load(tweet.id)
-    return count?.commentsCount || 0
   }
 
   @FieldResolver(() => Boolean)

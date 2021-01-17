@@ -1,5 +1,6 @@
 import { AuthenticationError } from 'apollo-server'
 import jwt from 'jsonwebtoken'
+import Knex from 'knex'
 import { JWT_SECRET } from '../config/config'
 import User from '../entities/User'
 import InvalidTokenError from '../errors/InvalidTokenError'
@@ -43,4 +44,18 @@ export const extractJwtToken = (req: any) => {
   } catch (e) {
     throw e
   }
+}
+
+export const selectCountsForTweet = (db: Knex) => {
+  return [
+    db.raw(
+      '(SELECT count(tweet_id) from likes where likes.tweet_id = tweets.id) as "likesCount"'
+    ),
+    db.raw(
+      `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'comment') as "commentsCount"`
+    ),
+    db.raw(
+      `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'retweet') as "retweetsCount"`
+    ),
+  ]
 }
