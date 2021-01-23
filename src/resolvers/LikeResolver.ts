@@ -1,13 +1,5 @@
 import { ApolloError } from 'apollo-server'
-import {
-  Arg,
-  Authorized,
-  Ctx,
-  Int,
-  Mutation,
-  ObjectType,
-  Resolver,
-} from 'type-graphql'
+import { Arg, Authorized, Ctx, Mutation, Resolver } from 'type-graphql'
 import { MyContext } from '../types/types'
 
 @Resolver()
@@ -15,11 +7,7 @@ class LikeResolver {
   @Mutation(() => String)
   @Authorized()
   async toggleLike(@Arg('tweet_id') tweet_id: number, @Ctx() ctx: MyContext) {
-    const {
-      db,
-      userId,
-      dataloaders: { likesCountDataloader },
-    } = ctx
+    const { db, userId } = ctx
 
     const [tweet] = await db('tweets').where('id', tweet_id)
 
@@ -39,14 +27,10 @@ class LikeResolver {
         // Delete the like and return
         await db('likes').where(data).del()
 
-        likesCountDataloader.clear(tweet_id)
-
         return 'Like deleted'
       }
 
       await db('likes').insert(data)
-
-      likesCountDataloader.clear(tweet_id)
 
       return 'Like added'
     } catch (e) {

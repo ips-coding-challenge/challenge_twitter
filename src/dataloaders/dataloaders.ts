@@ -1,6 +1,6 @@
 import DataLoader from 'dataloader'
 import db from '../db/connection'
-import Tweet, { TweetTypeEnum } from '../entities/Tweet'
+import Tweet from '../entities/Tweet'
 import User from '../entities/User'
 import { selectCountsForTweet } from '../utils/utils'
 
@@ -23,8 +23,6 @@ export const dataloaders = {
     const parents = await db('tweets')
       .whereIn('id', ids)
       .select(selectCountsForTweet(db))
-    // .select([selectCountsForTweet(db), 'tweets.*'])
-
     return ids.map((id) => parents.find((p) => p.id === id))
   }),
 }

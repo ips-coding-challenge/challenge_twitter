@@ -16,7 +16,7 @@ class User {
 
   password: string
 
-  @Field()
+  @Field({ nullable: true })
   avatar?: string
 
   @Field({ nullable: true })
