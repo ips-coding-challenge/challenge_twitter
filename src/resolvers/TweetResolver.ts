@@ -96,7 +96,7 @@ class TweetResolver {
     @Ctx() ctx: MyContext
   ) {
     const { db, userId } = ctx
-    const { body, hashTags, url, type, parent_id } = payload
+    const { body, hashtags, url, type, parent_id } = payload
 
     // Maybe I should add a mutation to handle the retweet?
     // For the comment, we can comment as much as we want so I could
@@ -131,8 +131,8 @@ class TweetResolver {
         })
         .returning('*')
 
-      if (hashTags && hashTags?.length > 0) {
-        const hashTagToInsert = hashTags.map((h) => {
+      if (hashtags && hashtags?.length > 0) {
+        const hashTagToInsert = hashtags.map((h) => {
           return {
             hashtag: h,
           }
@@ -146,7 +146,7 @@ class TweetResolver {
 
           // Get the hashTagsIds
           const hashTagsIds = await db('hashtags')
-            .whereIn('hashtag', hashTags)
+            .whereIn('hashtag', hashtags)
             .pluck('id')
 
           // Insert the relation betweet hashtag and the tweet

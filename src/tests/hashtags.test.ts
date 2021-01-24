@@ -1,10 +1,9 @@
+import { ValidationError } from 'apollo-server'
 import db from '../db/connection'
 import { generateToken } from '../utils/utils'
-import { createHashtag, createUser, followUser } from './helpers'
-import { testClient } from './setup'
-import { TOGGLE_FOLLOW } from './queries/followers.queries'
+import { createHashtag, createUser } from './helpers'
 import { ADD_TWEET } from './queries/tweets.queries'
-import { ValidationError } from 'apollo-server'
+import { testClient } from './setup'
 
 describe('Hashtags', () => {
   beforeEach(async () => {
@@ -38,7 +37,7 @@ describe('Hashtags', () => {
           https://machin.fr
           
           #machin #truc`,
-          hashTags: ['#machin', '#truc'],
+          hashtags: ['#machin', '#truc'],
         },
       },
     })
@@ -77,7 +76,7 @@ describe('Hashtags', () => {
           https://machin.fr
           
           #machin #truc`,
-          hashTags: ['#machin', '#truc'],
+          hashtags: ['#machin', '#truc'],
         },
       },
     })
@@ -117,7 +116,7 @@ describe('Hashtags', () => {
           https://machin.fr
           
           #machin #truc`,
-          hashTags: ['#machin', '#truc', '#machin'],
+          hashtags: ['#machin', '#truc', '#machin'],
         },
       },
     })
@@ -157,7 +156,7 @@ describe('Hashtags', () => {
           https://machin.fr
           
           #machin #truc`,
-          hashTags: ['machin', '#truc'],
+          hashtags: ['machin', '#truc'],
         },
       },
     })

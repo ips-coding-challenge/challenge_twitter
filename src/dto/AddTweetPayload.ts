@@ -2,6 +2,8 @@ import {
   IsDefined,
   IsIn,
   IsNotEmpty,
+  IsUrl,
+  isURL,
   Matches,
   MinLength,
   ValidateIf,
@@ -22,9 +24,10 @@ class AddTweetPayload {
     message:
       'Each hashtag should start with a # and have a length betweet 2 and 20 characters',
   })
-  hashTags?: string[]
+  hashtags?: string[]
 
   @Field({ nullable: true })
+  @IsUrl()
   url?: string
 
   @Field(() => Int, { nullable: true })
