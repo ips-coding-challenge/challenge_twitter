@@ -4,6 +4,7 @@ import Knex from 'knex'
 import { JWT_SECRET } from '../config/config'
 import User from '../entities/User'
 import InvalidTokenError from '../errors/InvalidTokenError'
+import puppeteer from 'puppeteer'
 
 export const generateToken = (
   user: User,
@@ -59,4 +60,49 @@ export const selectCountsForTweet = (db: Knex) => {
     ),
     'tweets.*',
   ]
+}
+
+export const scrap = async (url: string) => {
+  const browser = await puppeteer.launch({
+    headless: true,
+  })
+  try {
+    const page = await browser.newPage()
+    console.log('url', url)
+    await page.goto(url)
+    const results = await page.evaluate(() => {
+      console.log('hum')
+      // @ts-ignore
+      const title = document
+        .querySelector("meta[property='og:title']")
+        .getAttribute('content')
+      // @ts-ignore
+      const img = document
+        .querySelector("meta[property='og:image']")
+        .getAttribute('content')
+      // @ts-ignore
+      const description = document
+        .querySelector("meta[property='og:description']")
+        .getAttribute('content')
+      // @ts-ignore
+      const url = document
+        .querySelector("meta[property='og:url']")
+        .getAttribute('content')
+
+      console.log('title', title)
+
+      return {
+        title,
+        img,
+        description,
+        url,
+      }
+    })
+
+    return results
+  } catch (e) {
+    console.log('e', e)
+  } finally {
+    browser.close()
+  }
 }
