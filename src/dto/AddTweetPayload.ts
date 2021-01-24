@@ -2,6 +2,7 @@ import {
   IsDefined,
   IsIn,
   IsNotEmpty,
+  Matches,
   MinLength,
   ValidateIf,
 } from 'class-validator'
@@ -14,6 +15,17 @@ class AddTweetPayload {
   @IsNotEmpty()
   @MinLength(2)
   body: string
+
+  @Field(() => [String], { nullable: true })
+  @Matches(/^#[\w]{2,20}$/, {
+    each: true,
+    message:
+      'Each hashtag should start with a # and have a length betweet 2 and 20 characters',
+  })
+  hashTags?: string[]
+
+  @Field({ nullable: true })
+  url?: string
 
   @Field(() => Int, { nullable: true })
   @ValidateIf((o) => o.type !== undefined)

@@ -96,7 +96,7 @@ class TweetResolver {
     @Ctx() ctx: MyContext
   ) {
     const { db, userId } = ctx
-    const { body, type, parent_id } = payload
+    const { body, hashTags, url, type, parent_id } = payload
 
     // Maybe I should add a mutation to handle the retweet?
     // For the comment, we can comment as much as we want so I could
@@ -124,10 +124,43 @@ class TweetResolver {
     try {
       const [tweet] = await db('tweets')
         .insert({
-          ...payload,
+          body,
+          type,
+          parent_id,
           user_id: userId,
         })
         .returning('*')
+
+      if (hashTags && hashTags?.length > 0) {
+        const hashTagToInsert = hashTags.map((h) => {
+          return {
+            hashtag: h,
+          }
+        })
+        try {
+          // Insert the hashtags
+          await db('hashtags')
+            .insert(hashTagToInsert)
+            .onConflict('hashtag')
+            .ignore()
+
+          // Get the hashTagsIds
+          const hashTagsIds = await db('hashtags')
+            .whereIn('hashtag', hashTags)
+            .pluck('id')
+
+          // Insert the relation betweet hashtag and the tweet
+          const toInsert = hashTagsIds.map((id) => {
+            return {
+              hashtag_id: id,
+              tweet_id: tweet.id,
+            }
+          })
+          await db('hashtags_tweets').insert(toInsert)
+        } catch (e) {
+          console.log('e', e)
+        }
+      }
 
       return tweet
     } catch (e) {

@@ -59,3 +59,11 @@ export const followUser = async (user: User, following: User) => {
     following_id: following.id,
   })
 }
+
+export const createHashtag = async (hashtag: string) => {
+  return await db('hashtags')
+    .insert({
+      hashtag,
+    })
+    .returning('*')
+}
