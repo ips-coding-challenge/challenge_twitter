@@ -95,8 +95,12 @@ class TweetResolver {
     @Arg('payload') payload: AddTweetPayload,
     @Ctx() ctx: MyContext
   ) {
-    const { db, userId } = ctx
+    const { db, userId, bus } = ctx
     const { body, hashtags, url, type, parent_id } = payload
+
+    if (url) {
+      bus.emit('scrap', url)
+    }
 
     // Maybe I should add a mutation to handle the retweet?
     // For the comment, we can comment as much as we want so I could

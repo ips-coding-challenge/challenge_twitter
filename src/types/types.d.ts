@@ -1,4 +1,5 @@
 import DataLoader from 'dataloader'
+import { EventEmitter } from 'events'
 import Knex from 'knex'
 import Tweet from '../entities/Tweet'
 import User from '../entities/User'
@@ -13,4 +14,5 @@ export type MyContext = {
     isLikedDataloader: DataLoader<any, any, unknown>
     parentTweetDataloader: DataLoader<number, Tweet, unknown>
   }
+  bus: EventEmitter
 }

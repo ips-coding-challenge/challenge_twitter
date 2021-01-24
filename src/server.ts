@@ -8,6 +8,7 @@ import TweetResolver from './resolvers/TweetResolver'
 import { dataloaders } from './dataloaders/dataloaders'
 import LikeResolver from './resolvers/LikeResolver'
 import FollowerResolver from './resolvers/FollowerResolver'
+import scrapPreviewEmitter from './events/scrapPreviewEmitter'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -15,6 +16,7 @@ export const defaultContext = ({ req, res }: any) => {
     res,
     db,
     dataloaders,
+    bus: scrapPreviewEmitter,
   }
 }
 
