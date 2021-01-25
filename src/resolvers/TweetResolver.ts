@@ -11,6 +11,7 @@ import {
   Root,
 } from 'type-graphql'
 import AddTweetPayload from '../dto/AddTweetPayload'
+import Preview from '../entities/Preview'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
@@ -89,13 +90,27 @@ class TweetResolver {
     return isLiked !== undefined
   }
 
+  @FieldResolver(() => Preview)
+  async preview(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { previewLinkDataloader },
+    } = ctx
+
+    return await previewLinkDataloader.load(tweet.id)
+  }
+
   @Mutation(() => Tweet)
   @Authorized()
   async addTweet(
     @Arg('payload') payload: AddTweetPayload,
     @Ctx() ctx: MyContext
   ) {
-    const { db, userId, bus } = ctx
+    const {
+      db,
+      userId,
+      bus,
+      dataloaders: { previewLinkDataloader },
+    } = ctx
     const { body, hashtags, url, type, parent_id } = payload
 
     // Maybe I should add a mutation to handle the retweet?
@@ -163,7 +178,17 @@ class TweetResolver {
         }
       }
 
-      return tweet
+      // As I removed the count resolver, I need to refetch the
+      // tweet to add the select.
+      // I'm not sure what is the best way to do it.
+      // Is it better to add a field resolver ( increasing quite a lot the sql queries)
+      // Or just adding this sql request...
+      // Feel free to comment and let me know ;)
+      const [finalTweet] = await db('tweets')
+        .where('id', tweet.id)
+        .select(selectCountsForTweet(db))
+
+      return finalTweet
     } catch (e) {
       throw new ApolloError(e.message)
     }

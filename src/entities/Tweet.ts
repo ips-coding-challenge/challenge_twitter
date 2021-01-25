@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
+import Preview from './Preview'
 import User from './User'
 
 export enum TweetTypeEnum {
@@ -48,6 +49,9 @@ class Tweet {
 
   @Field()
   isLiked: boolean
+
+  @Field({ nullable: true })
+  preview?: Preview
 
   @Field()
   created_at: Date
