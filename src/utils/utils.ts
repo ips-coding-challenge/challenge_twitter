@@ -77,7 +77,7 @@ export const scrap = async (url: string) => {
         .querySelector("meta[property='og:title']")
         .getAttribute('content')
       // @ts-ignore
-      const img = document
+      const image = document
         .querySelector("meta[property='og:image']")
         .getAttribute('content')
       // @ts-ignore
@@ -93,7 +93,7 @@ export const scrap = async (url: string) => {
 
       return {
         title,
-        img,
+        image,
         description,
         url,
       }

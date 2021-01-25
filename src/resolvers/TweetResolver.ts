@@ -98,10 +98,6 @@ class TweetResolver {
     const { db, userId, bus } = ctx
     const { body, hashtags, url, type, parent_id } = payload
 
-    if (url) {
-      bus.emit('scrap', url)
-    }
-
     // Maybe I should add a mutation to handle the retweet?
     // For the comment, we can comment as much as we want so I could
     // still add the comment here.
@@ -135,6 +131,11 @@ class TweetResolver {
         })
         .returning('*')
 
+      // Send the event to scrap the preview
+      if (url) {
+        bus.emit('scrap', url, tweet.id)
+      }
+
       if (hashtags && hashtags?.length > 0) {
         const hashTagToInsert = hashtags.map((h) => {
           return {
@@ -143,15 +144,11 @@ class TweetResolver {
         })
         try {
           // Insert the hashtags
-          await db('hashtags')
+          const hashTagsIds = await db('hashtags')
             .insert(hashTagToInsert)
             .onConflict('hashtag')
-            .ignore()
-
-          // Get the hashTagsIds
-          const hashTagsIds = await db('hashtags')
-            .whereIn('hashtag', hashtags)
-            .pluck('id')
+            .merge()
+            .returning('id')
 
           // Insert the relation betweet hashtag and the tweet
           const toInsert = hashTagsIds.map((id) => {
