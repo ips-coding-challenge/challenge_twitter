@@ -19,6 +19,7 @@
     "jsonwebtoken": "^8.5.1",
     "knex": "^0.21.15",
     "pg": "^8.5.1",
+    "puppeteer": "^5.5.0",
     "reflect-metadata": "^0.1.13",
     "type-graphql": "^1.1.1"
   },
@@ -27,6 +28,7 @@
     "@types/faker": "^5.1.5",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "^14.14.20",
+    "@types/puppeteer": "^5.4.2",
     "apollo-server-testing": "^2.19.1",
     "cross-env": "^7.0.3",
     "faker": "^5.1.0",

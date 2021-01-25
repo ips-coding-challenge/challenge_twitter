@@ -31,8 +31,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -70,8 +68,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -110,8 +106,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -121,17 +115,17 @@ describe('Hashtags', () => {
       },
     })
 
-    const hashtags = await db('hashtags')
-      .whereIn('hashtag', ['#machin', '#truc', '#machin'])
-      .pluck('id')
+    expect(res.errors).not.toBeUndefined()
 
-    expect(hashtags.length).toEqual(2)
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
 
-    const tweets_hashtags = await db('hashtags_tweets')
-      .whereIn('hashtag_id', hashtags)
-      .andWhere('tweet_id', res.data.addTweet.id)
-
-    expect(tweets_hashtags.length).toEqual(2)
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      arrayUnique: "All hashtags's elements must be unique",
+    })
   })
 
   it('should not insert invalid hashtag', async () => {
@@ -151,8 +145,6 @@ describe('Hashtags', () => {
         payload: {
           body: `Really nice Tweet
 
-          @ipsaous
-          
           https://machin.fr
           
           #machin #truc`,

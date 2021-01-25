@@ -1,4 +1,5 @@
 import {
+  ArrayUnique,
   IsDefined,
   IsIn,
   IsNotEmpty,
@@ -19,6 +20,7 @@ class AddTweetPayload {
   body: string
 
   @Field(() => [String], { nullable: true })
+  @ArrayUnique()
   @Matches(/^#[\w]{2,20}$/, {
     each: true,
     message:
