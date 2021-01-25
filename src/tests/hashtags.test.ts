@@ -31,8 +31,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -70,8 +68,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -110,8 +106,6 @@ describe('Hashtags', () => {
       variables: {
         payload: {
           body: `Really nice Tweet
-
-          @ipsaous
           
           https://machin.fr
           
@@ -151,8 +145,6 @@ describe('Hashtags', () => {
         payload: {
           body: `Really nice Tweet
 
-          @ipsaous
-          
           https://machin.fr
           
           #machin #truc`,

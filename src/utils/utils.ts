@@ -71,7 +71,6 @@ export const scrap = async (url: string) => {
     console.log('url', url)
     await page.goto(url)
     const results = await page.evaluate(() => {
-      console.log('hum')
       // @ts-ignore
       const title = document
         .querySelector("meta[property='og:title']")
@@ -88,8 +87,6 @@ export const scrap = async (url: string) => {
       const url = document
         .querySelector("meta[property='og:url']")
         .getAttribute('content')
-
-      console.log('title', title)
 
       return {
         title,
