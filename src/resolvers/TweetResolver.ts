@@ -11,6 +11,7 @@ import {
   Root,
 } from 'type-graphql'
 import AddTweetPayload from '../dto/AddTweetPayload'
+import Preview from '../entities/Preview'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
@@ -89,6 +90,15 @@ class TweetResolver {
     return isLiked !== undefined
   }
 
+  @FieldResolver(() => Preview)
+  async preview(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { previewLinkDataloader },
+    } = ctx
+
+    return await previewLinkDataloader.load(tweet.id)
+  }
+
   @Mutation(() => Tweet)
   @Authorized()
   async addTweet(
@@ -163,7 +173,14 @@ class TweetResolver {
         }
       }
 
-      return tweet
+      // I add the differents counts as there not nullable and
+      // I need them in the frontend.
+      return {
+        ...tweet,
+        likesCount: 0,
+        commentsCount: 0,
+        retweetsCount: 0,
+      }
     } catch (e) {
       throw new ApolloError(e.message)
     }

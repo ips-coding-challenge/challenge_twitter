@@ -25,4 +25,14 @@ export const dataloaders = {
       .select(selectCountsForTweet(db))
     return ids.map((id) => parents.find((p) => p.id === id))
   }),
+  previewLinkDataloader: new DataLoader<number, unknown, unknown>(
+    async (ids) => {
+      const previews = await db('previews as p')
+        .innerJoin('previews_tweets as pt', 'pt.preview_id', '=', 'p.id')
+        .whereIn('pt.tweet_id', ids)
+        .select(['p.*', 'pt.tweet_id'])
+
+      return ids.map((id) => previews.find((p) => p.tweet_id === id))
+    }
+  ),
 }

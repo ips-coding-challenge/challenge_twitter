@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     t.bigIncrements('id')
     t.string('url').notNullable().unique()
     t.string('title').notNullable()
-    t.string('description')
+    t.text('description')
     t.string('image')
     t.timestamps(false, true)
   })

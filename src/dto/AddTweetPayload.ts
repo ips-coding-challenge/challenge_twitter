@@ -6,6 +6,7 @@ import {
   IsUrl,
   isURL,
   Matches,
+  MaxLength,
   MinLength,
   ValidateIf,
 } from 'class-validator'
@@ -17,6 +18,7 @@ class AddTweetPayload {
   @Field()
   @IsNotEmpty()
   @MinLength(2)
+  @MaxLength(380)
   body: string
 
   @Field(() => [String], { nullable: true })
