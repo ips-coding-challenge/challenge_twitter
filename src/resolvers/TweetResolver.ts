@@ -105,12 +105,7 @@ class TweetResolver {
     @Arg('payload') payload: AddTweetPayload,
     @Ctx() ctx: MyContext
   ) {
-    const {
-      db,
-      userId,
-      bus,
-      dataloaders: { previewLinkDataloader },
-    } = ctx
+    const { db, userId, bus } = ctx
     const { body, hashtags, url, type, parent_id } = payload
 
     // Maybe I should add a mutation to handle the retweet?
@@ -178,17 +173,14 @@ class TweetResolver {
         }
       }
 
-      // As I removed the count resolver, I need to refetch the
-      // tweet to add the select.
-      // I'm not sure what is the best way to do it.
-      // Is it better to add a field resolver ( increasing quite a lot the sql queries)
-      // Or just adding this sql request...
-      // Feel free to comment and let me know ;)
-      const [finalTweet] = await db('tweets')
-        .where('id', tweet.id)
-        .select(selectCountsForTweet(db))
-
-      return finalTweet
+      // I add the differents counts as there not nullable and
+      // I need them in the frontend.
+      return {
+        ...tweet,
+        likesCount: 0,
+        commentsCount: 0,
+        retweetsCount: 0,
+      }
     } catch (e) {
       throw new ApolloError(e.message)
     }
