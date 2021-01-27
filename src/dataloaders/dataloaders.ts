@@ -19,6 +19,15 @@ export const dataloaders = {
       .andWhere('user_id', userId)
     return tweetIds.map((id) => likes.find((l) => l.tweet_id === id))
   }),
+  isRetweetedDataloader: new DataLoader<any, any, unknown>(async (keys) => {
+    const tweetIds = keys.map((k: any) => k.tweet_id)
+    const userId = keys[0].user_id
+
+    const retweets = await db('retweets')
+      .whereIn('tweet_id', tweetIds)
+      .andWhere('user_id', userId)
+    return tweetIds.map((id) => retweets.find((r) => r.tweet_id === id))
+  }),
   parentTweetDataloader: new DataLoader<number, Tweet, unknown>(async (ids) => {
     const parents = await db('tweets')
       .whereIn('id', ids)

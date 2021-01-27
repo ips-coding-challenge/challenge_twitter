@@ -67,3 +67,14 @@ export const createHashtag = async (hashtag: string) => {
     })
     .returning('*')
 }
+
+export const createRetweet = async (user: User, tweet: Tweet) => {
+  const [retweet] = await db('retweets')
+    .insert({
+      user_id: user.id,
+      tweet_id: tweet.id,
+    })
+    .returning('*')
+
+  return retweet
+}

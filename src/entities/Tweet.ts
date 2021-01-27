@@ -50,6 +50,9 @@ class Tweet {
   @Field()
   isLiked: boolean
 
+  @Field()
+  isRetweeted: boolean
+
   @Field({ nullable: true })
   preview?: Preview
 

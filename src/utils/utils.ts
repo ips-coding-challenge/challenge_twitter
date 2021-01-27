@@ -56,7 +56,7 @@ export const selectCountsForTweet = (db: Knex) => {
       `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'comment') as "commentsCount"`
     ),
     db.raw(
-      `(SELECT count(t.parent_id) from tweets t where t.parent_id = tweets.id and t.type = 'retweet') as "retweetsCount"`
+      `(SELECT count(tweet_id) from retweets where retweets.tweet_id = tweets.id) as "retweetsCount"`
     ),
     'tweets.*',
   ]
