@@ -14,6 +14,7 @@ export type MyContext = {
     isLikedDataloader: DataLoader<any, any, unknown>
     parentTweetDataloader: DataLoader<number, Tweet, unknown>
     previewLinkDataloader: DataLoader<number, unknown, unknown>
+    isRetweetedDataloader: DataLoader<any, any, unknown>
   }
   bus: EventEmitter
 }

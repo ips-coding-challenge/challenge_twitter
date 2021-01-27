@@ -73,7 +73,6 @@ class TweetResolver {
   }
 
   @FieldResolver(() => Boolean)
-  @Authorized('ANONYMOUS')
   async isLiked(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
       userId,
@@ -88,6 +87,23 @@ class TweetResolver {
     })
 
     return isLiked !== undefined
+  }
+
+  @FieldResolver(() => Boolean)
+  async isRetweeted(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      userId,
+      dataloaders: { isRetweetedDataloader },
+    } = ctx
+
+    if (!userId) return false
+
+    const isRetweeted = await isRetweetedDataloader.load({
+      tweet_id: tweet.id,
+      user_id: userId,
+    })
+
+    return isRetweeted !== undefined
   }
 
   @FieldResolver(() => Preview)
@@ -107,22 +123,6 @@ class TweetResolver {
   ) {
     const { db, userId, bus } = ctx
     const { body, hashtags, url, type, parent_id } = payload
-
-    // Maybe I should add a mutation to handle the retweet?
-    // For the comment, we can comment as much as we want so I could
-    // still add the comment here.
-    // Feel free to share your opinion ;)
-    if (type === TweetTypeEnum.RETWEET && parent_id) {
-      const [alreadyRetweeted] = await db('tweets').where({
-        parent_id: parent_id,
-        type: TweetTypeEnum.RETWEET,
-        user_id: userId,
-      })
-
-      if (alreadyRetweeted) {
-        throw new ApolloError('You already retweeted that tweet')
-      }
-    }
 
     if (parent_id) {
       const [tweetExists] = await db('tweets').where('id', parent_id)

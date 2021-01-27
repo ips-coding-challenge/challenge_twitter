@@ -9,6 +9,7 @@ import { dataloaders } from './dataloaders/dataloaders'
 import LikeResolver from './resolvers/LikeResolver'
 import FollowerResolver from './resolvers/FollowerResolver'
 import scrapPreviewEmitter from './events/scrapPreviewEmitter'
+import RetweetResolver from './resolvers/RetweetResolver'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -22,7 +23,13 @@ export const defaultContext = ({ req, res }: any) => {
 
 export const schema = async () => {
   return await buildSchema({
-    resolvers: [AuthResolver, TweetResolver, LikeResolver, FollowerResolver],
+    resolvers: [
+      AuthResolver,
+      TweetResolver,
+      LikeResolver,
+      FollowerResolver,
+      RetweetResolver,
+    ],
     authChecker: authChecker,
   })
 }
