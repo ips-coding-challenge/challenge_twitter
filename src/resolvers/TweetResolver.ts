@@ -197,6 +197,7 @@ class TweetResolver {
         likesCount: 0,
         commentsCount: 0,
         retweetsCount: 0,
+        bookmarksCount: 0,
       }
     } catch (e) {
       throw new ApolloError(e.message)
