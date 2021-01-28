@@ -78,3 +78,14 @@ export const createRetweet = async (user: User, tweet: Tweet) => {
 
   return retweet
 }
+
+export const createBookmark = async (user: User, tweet: Tweet) => {
+  const [bookmark] = await db('bookmarks')
+    .insert({
+      user_id: user.id,
+      tweet_id: tweet.id,
+    })
+    .returning('*')
+
+  return bookmark
+}
