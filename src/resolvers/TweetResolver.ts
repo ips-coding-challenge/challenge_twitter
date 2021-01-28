@@ -106,6 +106,23 @@ class TweetResolver {
     return isRetweeted !== undefined
   }
 
+  @FieldResolver(() => Boolean)
+  async isBookmarked(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      userId,
+      dataloaders: { isBookmarkedDataloader },
+    } = ctx
+
+    if (!userId) return false
+
+    const isBookmarked = await isBookmarkedDataloader.load({
+      tweet_id: tweet.id,
+      user_id: userId,
+    })
+
+    return isBookmarked !== undefined
+  }
+
   @FieldResolver(() => Preview)
   async preview(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {

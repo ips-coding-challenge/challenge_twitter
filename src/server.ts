@@ -10,6 +10,7 @@ import LikeResolver from './resolvers/LikeResolver'
 import FollowerResolver from './resolvers/FollowerResolver'
 import scrapPreviewEmitter from './events/scrapPreviewEmitter'
 import RetweetResolver from './resolvers/RetweetResolver'
+import BookmarkResolver from './resolvers/BookmarkResolver'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -29,6 +30,7 @@ export const schema = async () => {
       LikeResolver,
       FollowerResolver,
       RetweetResolver,
+      BookmarkResolver,
     ],
     authChecker: authChecker,
   })

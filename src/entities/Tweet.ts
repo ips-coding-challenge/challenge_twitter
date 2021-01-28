@@ -48,10 +48,16 @@ class Tweet {
   likesCount: number
 
   @Field()
+  bookmarksCount: number
+
+  @Field()
   isLiked: boolean
 
   @Field()
   isRetweeted: boolean
+
+  @Field()
+  isBookmarked: boolean
 
   @Field({ nullable: true })
   preview?: Preview
