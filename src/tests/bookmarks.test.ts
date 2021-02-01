@@ -1,16 +1,7 @@
 import db from '../db/connection'
 import { generateToken } from '../utils/utils'
-import {
-  createBookmark,
-  createLike,
-  createRetweet,
-  createTweet,
-  createUser,
-} from './helpers'
+import { createBookmark, createTweet, createUser } from './helpers'
 import { TOGGLE_BOOKMARK } from './queries/bookmarks.queries'
-import { TOGGLE_LIKE } from './queries/likes.queries'
-import { TOGGLE_RETWEET } from './queries/retweets.queries'
-import { ADD_TWEET, FEED, DELETE_TWEET } from './queries/tweets.queries'
 import { testClient } from './setup'
 
 describe('Bookmarks', () => {
