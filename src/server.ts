@@ -11,7 +11,7 @@ import FollowerResolver from './resolvers/FollowerResolver'
 import scrapPreviewEmitter from './events/scrapPreviewEmitter'
 import RetweetResolver from './resolvers/RetweetResolver'
 import BookmarkResolver from './resolvers/BookmarkResolver'
-import HashtagResolver from './resolvers/HashTagResolver'
+import HashtagResolver from './resolvers/HashtagResolver'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
