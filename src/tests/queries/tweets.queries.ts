@@ -29,6 +29,10 @@ export const ADD_TWEET = gql`
         id
         username
       }
+      media {
+        id
+        url
+      }
     }
   }
 `

@@ -4,7 +4,6 @@ import {
   IsIn,
   IsNotEmpty,
   IsUrl,
-  isURL,
   Matches,
   MaxLength,
   MinLength,
@@ -47,6 +46,10 @@ class AddTweetPayload {
 
   @Field(() => String, { nullable: true })
   visibility?: string
+
+  @Field({ nullable: true })
+  @IsUrl()
+  media?: string
 }
 
 export default AddTweetPayload
