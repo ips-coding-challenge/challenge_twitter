@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
   return knex.schema.createTable('medias', (t) => {
     t.bigIncrements('id')
     t.string('url').notNullable()
-    t.integer('tweet_id').unsigned().notNullable()
+    t.integer('tweet_id').unsigned().notNullable().unique()
     t.integer('user_id').unsigned().notNullable()
     t.timestamps(false, true)
 

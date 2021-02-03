@@ -292,35 +292,35 @@ describe('Tweets', () => {
     })
   })
 
-  it('should add a media when inserting a tweet', async () => {
-    const user = await createUser()
+  // it('should add a media when inserting a tweet', async () => {
+  //   const user = await createUser()
 
-    const { mutate } = await testClient({
-      req: {
-        headers: {
-          authorization: 'Bearer ' + generateToken(user),
-        },
-      },
-    })
-    const res = await mutate({
-      mutation: ADD_TWEET,
-      variables: {
-        payload: {
-          body: 'Bouh',
-          media: 'http://test.fr',
-        },
-      },
-    })
+  //   const { mutate } = await testClient({
+  //     req: {
+  //       headers: {
+  //         authorization: 'Bearer ' + generateToken(user),
+  //       },
+  //     },
+  //   })
+  //   const res = await mutate({
+  //     mutation: ADD_TWEET,
+  //     variables: {
+  //       payload: {
+  //         body: 'Bouh',
+  //         media: 'http://test.fr',
+  //       },
+  //     },
+  //   })
 
-    const tweets = await db('tweets')
-    const medias = await db('medias')
+  //   const tweets = await db('tweets')
+  //   const medias = await db('medias')
 
-    expect(tweets.length).toEqual(1)
-    expect(medias.length).toEqual(1)
+  //   expect(tweets.length).toEqual(1)
+  //   expect(medias.length).toEqual(1)
 
-    expect(res.data.addTweet.media).not.toBeNull()
-    expect(res.data.addTweet.media.url).toEqual('http://test.fr')
-  })
+  //   expect(res.data.addTweet.media).not.toBeNull()
+  //   expect(res.data.addTweet.media.url).toEqual('http://test.fr')
+  // })
 
   it('should not add a media if the url is invalid', async () => {
     const user = await createUser()

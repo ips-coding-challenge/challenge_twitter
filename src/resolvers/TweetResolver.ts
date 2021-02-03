@@ -224,7 +224,7 @@ class TweetResolver {
         commentsCount: 0,
         retweetsCount: 0,
         bookmarksCount: 0,
-        ...(media && { media: newMedia }),
+        media: newMedia ?? null,
       }
     } catch (e) {
       throw new ApolloError(e.message)
