@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
+import Media from './Media'
 import Preview from './Preview'
 import User from './User'
 
@@ -35,6 +36,9 @@ class Tweet {
 
   @Field()
   user: User
+
+  @Field(() => Media, { nullable: true })
+  media?: Media
 
   user_id: number
 

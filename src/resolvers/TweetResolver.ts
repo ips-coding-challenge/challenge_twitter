@@ -11,6 +11,7 @@ import {
   Root,
 } from 'type-graphql'
 import AddTweetPayload from '../dto/AddTweetPayload'
+import Media from '../entities/Media'
 import Preview from '../entities/Preview'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import User from '../entities/User'
@@ -132,6 +133,15 @@ class TweetResolver {
     return await previewLinkDataloader.load(tweet.id)
   }
 
+  @FieldResolver(() => Media)
+  async media(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+    const {
+      dataloaders: { mediaDataloader },
+    } = ctx
+
+    return await mediaDataloader.load(tweet.id)
+  }
+
   @Mutation(() => Tweet)
   @Authorized()
   async addTweet(
@@ -139,7 +149,7 @@ class TweetResolver {
     @Ctx() ctx: MyContext
   ) {
     const { db, userId, bus } = ctx
-    const { body, hashtags, url, type, parent_id } = payload
+    const { body, hashtags, url, type, parent_id, media } = payload
 
     if (parent_id) {
       const [tweetExists] = await db('tweets').where('id', parent_id)
@@ -149,14 +159,30 @@ class TweetResolver {
     }
 
     try {
-      const [tweet] = await db('tweets')
-        .insert({
-          body,
-          type,
-          parent_id,
-          user_id: userId,
-        })
-        .returning('*')
+      let tweet: any
+      let newMedia: any
+      await db.transaction(async (trx) => {
+        ;[tweet] = await db('tweets')
+          .insert({
+            body,
+            type,
+            parent_id,
+            user_id: userId,
+          })
+          .returning('*')
+          .transacting(trx)
+
+        if (media) {
+          ;[newMedia] = await db('medias')
+            .insert({
+              url: media,
+              user_id: userId,
+              tweet_id: tweet.id,
+            })
+            .returning(['id', 'url'])
+            .transacting(trx)
+        }
+      })
 
       // Send the event to scrap the preview
       if (url) {
@@ -198,6 +224,7 @@ class TweetResolver {
         commentsCount: 0,
         retweetsCount: 0,
         bookmarksCount: 0,
+        media: newMedia ?? null,
       }
     } catch (e) {
       throw new ApolloError(e.message)

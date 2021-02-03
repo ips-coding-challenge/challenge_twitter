@@ -1,6 +1,5 @@
 import { ValidationError } from 'apollo-server'
 import db from '../db/connection'
-import { TweetTypeEnum } from '../entities/Tweet'
 import { generateToken } from '../utils/utils'
 import { createTweet, createUser } from './helpers'
 import { ADD_TWEET, FEED, DELETE_TWEET } from './queries/tweets.queries'
@@ -290,6 +289,73 @@ describe('Tweets', () => {
 
     expect((validationErrors[0] as ValidationError).constraints).toEqual({
       isDefined: 'type should not be null or undefined',
+    })
+  })
+
+  // it('should add a media when inserting a tweet', async () => {
+  //   const user = await createUser()
+
+  //   const { mutate } = await testClient({
+  //     req: {
+  //       headers: {
+  //         authorization: 'Bearer ' + generateToken(user),
+  //       },
+  //     },
+  //   })
+  //   const res = await mutate({
+  //     mutation: ADD_TWEET,
+  //     variables: {
+  //       payload: {
+  //         body: 'Bouh',
+  //         media: 'http://test.fr',
+  //       },
+  //     },
+  //   })
+
+  //   const tweets = await db('tweets')
+  //   const medias = await db('medias')
+
+  //   expect(tweets.length).toEqual(1)
+  //   expect(medias.length).toEqual(1)
+
+  //   expect(res.data.addTweet.media).not.toBeNull()
+  //   expect(res.data.addTweet.media.url).toEqual('http://test.fr')
+  // })
+
+  it('should not add a media if the url is invalid', async () => {
+    const user = await createUser()
+
+    const { mutate } = await testClient({
+      req: {
+        headers: {
+          authorization: 'Bearer ' + generateToken(user),
+        },
+      },
+    })
+    const res = await mutate({
+      mutation: ADD_TWEET,
+      variables: {
+        payload: {
+          body: 'Bouh',
+          media: 'machin',
+        },
+      },
+    })
+
+    const tweets = await db('tweets')
+    const medias = await db('medias')
+
+    expect(tweets.length).toEqual(0)
+    expect(medias.length).toEqual(0)
+
+    const {
+      extensions: {
+        exception: { validationErrors },
+      },
+    }: any = res.errors![0]
+
+    expect((validationErrors[0] as ValidationError).constraints).toEqual({
+      isUrl: 'media must be an URL address',
     })
   })
 })

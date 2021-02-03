@@ -1,5 +1,6 @@
 import DataLoader from 'dataloader'
 import db from '../db/connection'
+import Media from '../entities/Media'
 import Tweet from '../entities/Tweet'
 import User from '../entities/User'
 import { selectCountsForTweet } from '../utils/utils'
@@ -53,4 +54,9 @@ export const dataloaders = {
       return ids.map((id) => previews.find((p) => p.tweet_id === id))
     }
   ),
+  mediaDataloader: new DataLoader<number, Media, unknown>(async (ids) => {
+    const medias = await db('medias').whereIn('tweet_id', ids)
+
+    return ids.map((id) => medias.find((m) => m.tweet_id === id))
+  }),
 }
