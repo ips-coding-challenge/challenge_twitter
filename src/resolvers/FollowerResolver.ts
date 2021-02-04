@@ -1,9 +1,33 @@
 import { ApolloError } from 'apollo-server'
-import { Arg, Authorized, Ctx, Mutation, Resolver } from 'type-graphql'
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import User from '../entities/User'
 import { MyContext } from '../types/types'
 
 @Resolver()
 class FollowerResolver {
+  @Query(() => [User])
+  @Authorized()
+  async followersSuggestions(@Ctx() ctx: MyContext) {
+    const { db, userId } = ctx
+
+    const followersIds = await db('followers')
+      .where('follower_id', userId)
+      .pluck('id')
+
+    const followersSuggestions = await db('users')
+      .select(
+        db.raw(
+          `(SELECT count(id) from followers f WHERE f.following_id = users.id ) as "followersCount"`
+        ),
+        'users.*'
+      )
+      .whereNotIn('id', followersIds.concat(userId))
+      .orderByRaw('random()') // Look for TABLESAMPLE for better performance
+      .limit(2)
+
+    return followersSuggestions
+  }
+
   @Mutation(() => String)
   @Authorized()
   async toggleFollow(

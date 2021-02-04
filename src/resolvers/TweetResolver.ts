@@ -185,7 +185,8 @@ class TweetResolver {
       })
 
       // Send the event to scrap the preview
-      if (url) {
+      // I don't want to scrap the preview is a media is uploaded
+      if (url && !media) {
         bus.emit('scrap', url, tweet.id)
       }
 

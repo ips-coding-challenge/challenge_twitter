@@ -26,6 +26,9 @@ class User {
   banner?: string
 
   @Field()
+  followersCount?: number
+
+  @Field()
   created_at: Date
 
   @Field()

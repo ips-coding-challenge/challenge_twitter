@@ -16,7 +16,7 @@ class HashtagResolver {
         )
       )
       .innerJoin('hashtags_tweets as ht', 'h.id', '=', 'ht.hashtag_id')
-      .whereRaw(`ht.created_at > NOW() -  interval '7 days'`)
+      .whereRaw(`ht.created_at > NOW() -  interval '1 month'`)
       .groupBy('h.id', 'ht.created_at')
       .orderBy('tweetsCount', 'desc')
       .limit(10)
