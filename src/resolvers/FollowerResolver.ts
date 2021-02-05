@@ -22,7 +22,8 @@ class FollowerResolver {
         'users.*'
       )
       .whereNotIn('id', followersIds.concat(userId))
-      .orderByRaw('random()') // Look for TABLESAMPLE for better performance
+      .orderBy('followersCount', 'desc')
+      // .orderByRaw('random()') // Look for TABLESAMPLE for better performance
       .limit(2)
 
     return followersSuggestions
