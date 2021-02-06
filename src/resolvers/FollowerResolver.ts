@@ -12,7 +12,7 @@ class FollowerResolver {
 
     const followersIds = await db('followers')
       .where('follower_id', userId)
-      .pluck('id')
+      .pluck('following_id')
 
     const followersSuggestions = await db('users')
       .select(
@@ -21,7 +21,7 @@ class FollowerResolver {
         ),
         'users.*'
       )
-      .whereNotIn('id', followersIds.concat(userId))
+      .whereNotIn('id', [...followersIds, userId])
       .orderBy('followersCount', 'desc')
       // .orderByRaw('random()') // Look for TABLESAMPLE for better performance
       .limit(2)
