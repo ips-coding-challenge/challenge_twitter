@@ -1,4 +1,5 @@
 import { Field, ID, Int, ObjectType } from 'type-graphql'
+import LikeRetweetAuthor from './LikeRetweetAuthor'
 import Media from './Media'
 import Preview from './Preview'
 import User from './User'
@@ -36,6 +37,16 @@ class Tweet {
 
   @Field()
   user: User
+
+  like_author?: string
+
+  retweet_author?: string
+
+  @Field(() => LikeRetweetAuthor, { nullable: true })
+  likeAuthor?: LikeRetweetAuthor
+
+  @Field(() => LikeRetweetAuthor, { nullable: true })
+  retweetAuthor?: LikeRetweetAuthor
 
   @Field(() => Media, { nullable: true })
   media?: Media

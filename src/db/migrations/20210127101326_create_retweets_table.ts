@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     t.increments('id')
     t.integer('user_id').unsigned().notNullable()
     t.integer('tweet_id').unsigned().notNullable()
+    t.timestamps(false, true)
 
     t.unique(['user_id', 'tweet_id'])
 

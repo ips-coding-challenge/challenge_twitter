@@ -61,7 +61,6 @@ export const selectCountsForTweet = (db: Knex) => {
     db.raw(
       `(SELECT count(tweet_id) from bookmarks where bookmarks.tweet_id = tweets.id) as "bookmarksCount"`
     ),
-    'tweets.*',
   ]
 }
 
