@@ -124,6 +124,7 @@ class TweetResolver {
       // In the third query, I select the retweets.created_at
       // I can then have the order by created_at that I want.
       .orderBy('created_at', 'desc')
+      .limit(20)
 
     return tweets
   }
