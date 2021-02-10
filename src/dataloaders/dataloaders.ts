@@ -46,21 +46,25 @@ export const dataloaders = {
 
     console.log('infos', infos)
 
-    let results: any[] = []
+    return tweetIds.map((id) => {
+      const results = infos.reduce((acc, current) => {
+        for (const [key, value] of Object.entries(current)) {
+          if (value) {
+            const index = acc.findIndex((el: any) => el.id === value)
+            if (index > -1) {
+              acc[index] = { ...acc[index], infos: [...acc[index].infos, key] }
+            } else {
+              acc.push({ id: value, infos: [key] })
+            }
+          }
+        }
 
-    tweetIds.map((id) => {
-      if (infos.find((i) => i.liked === id)) {
-        results.push({ id, liked: true })
-      } else if (infos.find((i) => i.retweeted === id)) {
-        results.push({ id, retweeted: true })
-      } else if (infos.find((i) => i.bookmarked === id)) {
-        results.push({ id, bookmarked: true })
-      } else {
-        results.push(null)
-      }
+        console.log('acc', acc)
+        return acc
+      }, [])
+
+      return results.find((r: any) => r.id === id)
     })
-    // console.log('results', results)
-    return results
   }),
   isLikedDataloader: new DataLoader<any, any, unknown>(async (keys) => {
     const tweetIds = keys.map((k: any) => k.tweet_id)

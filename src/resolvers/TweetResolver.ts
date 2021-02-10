@@ -26,107 +26,17 @@ class TweetResolver {
   @Query(() => [Tweet])
   @Authorized()
   async feed(@Ctx() ctx: MyContext) {
-    const { db, userId } = ctx
+    const {
+      userId,
+      repositories: { tweetRepository, followerRepository },
+    } = ctx
 
-    const followedUsers = await db('followers')
-      .where({
-        follower_id: userId,
-      })
-      .pluck('following_id')
+    const followedUsers = await followerRepository.findAll(
+      userId!,
+      'following_id'
+    )
 
-    const select = [
-      'tweets.id',
-      'tweets.body',
-      'tweets.user_id',
-      'tweets.parent_id',
-      'tweets.visibility',
-      'tweets.type',
-      ...selectCountsForTweet(db),
-    ]
-
-    const tweets = await db
-      .from(
-        db
-          // I do a union from 3 subqueries
-          .union(
-            [
-              // First Query
-              // I select the tweets from the tweets table
-              // and it will return the tweets and comments
-              db
-                .select([
-                  ...select,
-                  'tweets.created_at',
-                  db.raw('NULL as like_author'), // Need to have the same number of columns for
-                  db.raw('NULL as retweet_author'), // all the 3 queries
-                ])
-                .from('tweets')
-                // I want the tweets/comments from the followedUsers and
-                // those from the connected user
-                .whereIn('tweets.user_id', [...followedUsers, userId]),
-              // SECOND Query
-              db
-                .select([
-                  ...select,
-                  'likes.created_at',
-                  // I concat the display_name and username
-                  // I will need that to show "Like by @user" in the client
-                  db.raw(
-                    `concat (users.display_name,',', users.username) as like_author`
-                  ),
-                  db.raw('NULL'),
-                ])
-                .from('tweets')
-                .innerJoin('likes', 'likes.tweet_id', '=', 'tweets.id')
-                .innerJoin('users', 'users.id', '=', 'likes.user_id')
-                // I only want the likes from the followedUsers
-                .whereIn('tweets.id', function () {
-                  this.select('l.tweet_id')
-                    .from('likes as l')
-                    .whereIn('l.user_id', followedUsers)
-                })
-                // And if the user liked and retweeted the tweet, I "ignore" the like
-                .whereNotIn('tweets.id', function () {
-                  this.select('retweets.tweet_id')
-                    .from('retweets')
-                    .whereIn('retweets.user_id', followedUsers)
-                })
-                // I don't want the connected users likes
-                .andWhere('likes.user_id', '!=', userId),
-
-              // Third QUERY
-              db
-                .select([
-                  ...select,
-                  'retweets.created_at',
-                  db.raw('NULL'),
-                  db.raw(
-                    `concat (users.display_name,',', users.username) as retweet_author`
-                  ),
-                ])
-                .from('tweets')
-                .innerJoin('retweets', 'retweets.tweet_id', '=', 'tweets.id')
-                .innerJoin('users', 'users.id', '=', 'retweets.user_id')
-                .whereIn('tweets.id', function () {
-                  this.select('rt.tweet_id')
-                    .from('retweets as rt')
-                    .whereIn('rt.user_id', followedUsers)
-                })
-                .andWhere('retweets.user_id', '!=', userId),
-            ],
-            // Put parenthesis between the queries (Knex option)
-            // select * from ((select * from foo) union (select * from bar)) results
-            true
-          )
-          .as('results')
-      )
-      // One thing to notice is the order will be by the different created_at Field
-      // In the first query, I select the tweets.created_at
-      // In the second query, I select the likes.created_at
-      // In the third query, I select the retweets.created_at
-      // I can then have the order by created_at that I want.
-      .orderBy('created_at', 'desc')
-      .limit(20)
+    const tweets = tweetRepository.feed(userId!, followedUsers)
 
     return tweets
   }
@@ -175,13 +85,17 @@ class TweetResolver {
       user_id: userId,
     })
 
+    console.log('results', results)
+
     return {
-      isLiked: results ? results.id === tweet.id && results.liked : false,
+      isLiked: results
+        ? results.id === tweet.id && results.infos.includes('liked')
+        : false,
       isRetweeted: results
-        ? results.id === tweet.id && results.retweeted
+        ? results.id === tweet.id && results.infos.includes('retweeted')
         : false,
       isBookmarked: results
-        ? results.id === tweet.id && results.bookmarked
+        ? results.id === tweet.id && results.infos.includes('bookmarked')
         : false,
     }
   }
