@@ -2,6 +2,7 @@ import DataLoader from 'dataloader'
 import db from '../db/connection'
 import Media from '../entities/Media'
 import Tweet from '../entities/Tweet'
+import TweetStats from '../entities/TweetUserInfo'
 import User from '../entities/User'
 import { selectCountsForTweet } from '../utils/utils'
 
@@ -10,6 +11,60 @@ export const dataloaders = {
     const users = await db('users').whereIn('id', ids)
 
     return ids.map((id) => users.find((u) => u.id === id))
+  }),
+  tweetUserInfosDataloader: new DataLoader<any, any, unknown>(async (keys) => {
+    const tweetIds = keys.map((k: any) => k.tweet_id)
+    const userId = keys[0].user_id
+    const infos = await db.from(
+      db
+        .union(
+          [
+            db
+              .select(
+                db.raw(
+                  `likes.tweet_id as liked, cast(null as int) as retweeted, cast(null as int) as bookmarked`
+                )
+              )
+              .from('likes')
+              .whereIn('likes.tweet_id', tweetIds)
+              .andWhere('user_id', userId),
+            db
+              .select(db.raw(`null, retweets.tweet_id as retweeted, null`))
+              .from('retweets')
+              .whereIn('retweets.tweet_id', tweetIds)
+              .andWhere('user_id', userId),
+            db
+              .select(db.raw(`null, null, bookmarks.tweet_id as bookmarked`))
+              .from('bookmarks')
+              .whereIn('bookmarks.tweet_id', tweetIds)
+              .andWhere('user_id', userId),
+          ],
+          true
+        )
+        .as('results')
+    )
+
+    console.log('infos', infos)
+
+    return tweetIds.map((id) => {
+      const results = infos.reduce((acc, current) => {
+        for (const [key, value] of Object.entries(current)) {
+          if (value) {
+            const index = acc.findIndex((el: any) => el.id === value)
+            if (index > -1) {
+              acc[index] = { ...acc[index], infos: [...acc[index].infos, key] }
+            } else {
+              acc.push({ id: value, infos: [key] })
+            }
+          }
+        }
+
+        console.log('acc', acc)
+        return acc
+      }, [])
+
+      return results.find((r: any) => r.id === id)
+    })
   }),
   isLikedDataloader: new DataLoader<any, any, unknown>(async (keys) => {
     const tweetIds = keys.map((k: any) => k.tweet_id)

@@ -12,6 +12,7 @@ import scrapPreviewEmitter from './events/scrapPreviewEmitter'
 import RetweetResolver from './resolvers/RetweetResolver'
 import BookmarkResolver from './resolvers/BookmarkResolver'
 import HashtagResolver from './resolvers/HashtagResolver'
+import repositories from './repositories'
 
 export const defaultContext = ({ req, res }: any) => {
   return {
@@ -19,6 +20,7 @@ export const defaultContext = ({ req, res }: any) => {
     res,
     db,
     dataloaders,
+    repositories,
     bus: scrapPreviewEmitter,
   }
 }

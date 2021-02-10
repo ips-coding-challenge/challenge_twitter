@@ -2,6 +2,8 @@ import { Field, ID, Int, ObjectType } from 'type-graphql'
 import LikeRetweetAuthor from './LikeRetweetAuthor'
 import Media from './Media'
 import Preview from './Preview'
+import TweetUserInfo from './TweetUserInfo'
+import TweetStats from './TweetUserInfo'
 import User from './User'
 
 export enum TweetTypeEnum {
@@ -65,14 +67,17 @@ class Tweet {
   @Field()
   bookmarksCount: number
 
-  @Field()
-  isLiked: boolean
+  @Field(() => TweetUserInfo, { nullable: true })
+  tweetUserInfos?: TweetUserInfo
 
-  @Field()
-  isRetweeted: boolean
+  // @Field()
+  // isLiked: boolean
 
-  @Field()
-  isBookmarked: boolean
+  // @Field()
+  // isRetweeted: boolean
+
+  // @Field()
+  // isBookmarked: boolean
 
   @Field({ nullable: true })
   preview?: Preview
