@@ -12,6 +12,7 @@ export type MyContext = {
   userId: number | null
   dataloaders: {
     userDataloader: DataLoader<number, User, unknown>
+    tweetUserInfosDataloader: DataLoader<any, any, unknown>
     isLikedDataloader: DataLoader<any, any, unknown>
     parentTweetDataloader: DataLoader<number, Tweet, unknown>
     previewLinkDataloader: DataLoader<number, unknown, unknown>

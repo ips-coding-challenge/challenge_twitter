@@ -15,6 +15,8 @@ import LikeRetweetAuthor from '../entities/LikeRetweetAuthor'
 import Media from '../entities/Media'
 import Preview from '../entities/Preview'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
+import TweetUserInfos from '../entities/TweetUserInfo'
+import TweetUserInfo from '../entities/TweetUserInfo'
 import User from '../entities/User'
 import { MyContext } from '../types/types'
 import { selectCountsForTweet } from '../utils/utils'
@@ -161,55 +163,27 @@ class TweetResolver {
     return await parentTweetDataloader.load(tweet.parent_id!)
   }
 
-  @FieldResolver(() => Boolean)
-  async isLiked(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
+  @FieldResolver(() => TweetUserInfos)
+  async tweetUserInfos(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
       userId,
-      dataloaders: { isLikedDataloader },
+      dataloaders: { tweetUserInfosDataloader },
     } = ctx
 
-    if (!userId) return false
-
-    const isLiked = await isLikedDataloader.load({
+    const results = await tweetUserInfosDataloader.load({
       tweet_id: tweet.id,
       user_id: userId,
     })
 
-    return isLiked !== undefined
-  }
-
-  @FieldResolver(() => Boolean)
-  async isRetweeted(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      userId,
-      dataloaders: { isRetweetedDataloader },
-    } = ctx
-
-    if (!userId) return false
-
-    const isRetweeted = await isRetweetedDataloader.load({
-      tweet_id: tweet.id,
-      user_id: userId,
-    })
-
-    return isRetweeted !== undefined
-  }
-
-  @FieldResolver(() => Boolean)
-  async isBookmarked(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
-    const {
-      userId,
-      dataloaders: { isBookmarkedDataloader },
-    } = ctx
-
-    if (!userId) return false
-
-    const isBookmarked = await isBookmarkedDataloader.load({
-      tweet_id: tweet.id,
-      user_id: userId,
-    })
-
-    return isBookmarked !== undefined
+    return {
+      isLiked: results ? results.id === tweet.id && results.liked : false,
+      isRetweeted: results
+        ? results.id === tweet.id && results.retweeted
+        : false,
+      isBookmarked: results
+        ? results.id === tweet.id && results.bookmarked
+        : false,
+    }
   }
 
   @FieldResolver(() => Preview)
