@@ -70,14 +70,7 @@ class Tweet {
   @Field(() => TweetUserInfo, { nullable: true })
   tweetUserInfos?: TweetUserInfo
 
-  // @Field()
-  // isLiked: boolean
-
-  // @Field()
-  // isRetweeted: boolean
-
-  // @Field()
-  // isBookmarked: boolean
+  original_tweet_id?: number
 
   @Field({ nullable: true })
   preview?: Preview

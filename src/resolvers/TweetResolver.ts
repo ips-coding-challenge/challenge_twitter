@@ -1,8 +1,11 @@
 import { ApolloError } from 'apollo-server'
 import {
   Arg,
+  Args,
+  ArgsType,
   Authorized,
   Ctx,
+  Field,
   FieldResolver,
   Int,
   Mutation,
@@ -16,10 +19,21 @@ import Media from '../entities/Media'
 import Preview from '../entities/Preview'
 import Tweet, { TweetTypeEnum } from '../entities/Tweet'
 import TweetUserInfos from '../entities/TweetUserInfo'
-import TweetUserInfo from '../entities/TweetUserInfo'
 import User from '../entities/User'
+import { Filters } from '../repositories/TweetRepository'
 import { MyContext } from '../types/types'
-import { selectCountsForTweet } from '../utils/utils'
+
+@ArgsType()
+class ArgsFilters {
+  @Field()
+  limit?: number = 20
+
+  @Field()
+  offset?: number = 0
+
+  @Field(() => Filters, { nullable: true })
+  filter?: Filters = Filters.TWEETS_RETWEETS
+}
 
 @Resolver((of) => Tweet)
 class TweetResolver {
@@ -37,6 +51,22 @@ class TweetResolver {
     )
 
     const tweets = tweetRepository.feed(userId!, followedUsers)
+
+    return tweets
+  }
+
+  @Query(() => [Tweet])
+  @Authorized()
+  async tweets(
+    @Args() { limit, offset, filter }: ArgsFilters,
+    @Arg('user_id') user_id: number,
+    @Ctx() ctx: MyContext
+  ) {
+    const {
+      repositories: { tweetRepository },
+    } = ctx
+
+    const tweets = await tweetRepository.tweets(user_id, limit, offset, filter)
 
     return tweets
   }
@@ -73,6 +103,14 @@ class TweetResolver {
     return await parentTweetDataloader.load(tweet.parent_id!)
   }
 
+  @FieldResolver(() => TweetTypeEnum)
+  type(@Root() tweet: Tweet) {
+    if (tweet.original_tweet_id) {
+      return TweetTypeEnum.RETWEET
+    }
+    return tweet.type
+  }
+
   @FieldResolver(() => TweetUserInfos)
   async tweetUserInfos(@Root() tweet: Tweet, @Ctx() ctx: MyContext) {
     const {
@@ -84,8 +122,6 @@ class TweetResolver {
       tweet_id: tweet.id,
       user_id: userId,
     })
-
-    console.log('results', results)
 
     return {
       isLiked: results

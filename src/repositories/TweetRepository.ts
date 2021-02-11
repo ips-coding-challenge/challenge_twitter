@@ -3,7 +3,46 @@ import Tweet from '../entities/Tweet'
 import { selectCountsForTweet } from '../utils/utils'
 import BaseRepository from './BaseRepository'
 
+export enum Filters {
+  TWEETS_RETWEETS,
+  WITH_COMMENTS,
+  ONLY_MEDIA,
+  ONLY_LIKES,
+}
+
 class TweetRepository extends BaseRepository {
+  async tweets(
+    userId: number,
+    limit?: number,
+    offset?: number,
+    filter?: Filters
+  ) {
+    const qb = this.db('tweets')
+      .select([
+        'tweets.*',
+        ...selectCountsForTweet(this.db),
+        this.db.raw(
+          'greatest(tweets.created_at, retweets.created_at) as greatest_created_at'
+        ),
+        this.db.raw(
+          '(select retweets.tweet_id from retweets rt where rt.tweet_id = tweets.id and rt.user_id = ?) as original_tweet_id',
+          [userId]
+        ),
+      ])
+      .fullOuterJoin('retweets', 'retweets.tweet_id', '=', 'tweets.id')
+      .where('tweets.user_id', userId)
+
+    if (filter === Filters.WITH_COMMENTS) {
+      qb.whereIn('tweets.type', ['tweet', 'comment'])
+    } else {
+      qb.andWhere('tweets.type', 'tweet')
+    }
+
+    return await qb
+      .orWhere('retweets.user_id', userId)
+      .orderBy('greatest_created_at', 'desc')
+  }
+
   // Get the feed from the user
   async feed(
     userId: number,

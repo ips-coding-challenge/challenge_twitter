@@ -44,8 +44,6 @@ export const dataloaders = {
         .as('results')
     )
 
-    console.log('infos', infos)
-
     return tweetIds.map((id) => {
       const results = infos.reduce((acc, current) => {
         for (const [key, value] of Object.entries(current)) {
@@ -59,7 +57,6 @@ export const dataloaders = {
           }
         }
 
-        console.log('acc', acc)
         return acc
       }, [])
 

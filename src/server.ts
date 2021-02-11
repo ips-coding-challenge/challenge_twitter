@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import { ApolloServer } from 'apollo-server'
-import { buildSchema } from 'type-graphql'
+import { buildSchema, registerEnumType } from 'type-graphql'
 import AuthResolver from './resolvers/AuthResolver'
 import db from './db/connection'
 import { authChecker } from './middlewares/authChecker'
@@ -13,6 +13,11 @@ import RetweetResolver from './resolvers/RetweetResolver'
 import BookmarkResolver from './resolvers/BookmarkResolver'
 import HashtagResolver from './resolvers/HashtagResolver'
 import repositories from './repositories'
+import { Filters } from './repositories/TweetRepository'
+
+registerEnumType(Filters, {
+  name: 'Filters',
+})
 
 export const defaultContext = ({ req, res }: any) => {
   return {
