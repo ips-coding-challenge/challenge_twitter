@@ -14,6 +14,7 @@ import BookmarkResolver from './resolvers/BookmarkResolver'
 import HashtagResolver from './resolvers/HashtagResolver'
 import repositories from './repositories'
 import { Filters } from './repositories/TweetRepository'
+import UserResolver from './resolvers/UserResolver'
 
 registerEnumType(Filters, {
   name: 'Filters',
@@ -40,6 +41,7 @@ export const schema = async () => {
       RetweetResolver,
       BookmarkResolver,
       HashtagResolver,
+      UserResolver,
     ],
     authChecker: authChecker,
   })

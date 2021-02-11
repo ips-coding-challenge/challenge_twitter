@@ -25,10 +25,10 @@ import { MyContext } from '../types/types'
 
 @ArgsType()
 class ArgsFilters {
-  @Field()
+  @Field(() => Int, { nullable: true })
   limit?: number = 20
 
-  @Field()
+  @Field(() => Int, { nullable: true })
   offset?: number = 0
 
   @Field(() => Filters, { nullable: true })

@@ -13,8 +13,8 @@ export enum Filters {
 class TweetRepository extends BaseRepository {
   async tweets(
     userId: number,
-    limit?: number,
-    offset?: number,
+    limit: number = 20,
+    offset: number = 0,
     filter?: Filters
   ) {
     const qb = this.db('tweets')
@@ -40,6 +40,8 @@ class TweetRepository extends BaseRepository {
 
     return await qb
       .orWhere('retweets.user_id', userId)
+      .limit(limit)
+      .offset(offset)
       .orderBy('greatest_created_at', 'desc')
   }
 
