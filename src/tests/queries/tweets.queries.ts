@@ -9,6 +9,14 @@ export const FEED = gql`
       likesCount
       commentsCount
       retweetsCount
+      likeAuthor {
+        username
+        display_name
+      }
+      retweetAuthor {
+        username
+        display_name
+      }
       user {
         id
         username
