@@ -3,10 +3,13 @@ import {
   Authorized,
   Ctx,
   Field,
+  FieldResolver,
+  Int,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from 'type-graphql'
 import RegisterPayload from '../dto/RegisterPayload'
 import User from '../entities/User'
@@ -25,7 +28,7 @@ class AuthResponse {
   user: User
 }
 
-@Resolver()
+@Resolver((of) => User)
 class AuthResolver {
   @Query(() => User)
   @Authorized()
@@ -34,6 +37,18 @@ class AuthResolver {
     const [user] = await db('users').where('id', userId)
 
     return user
+  }
+
+  @FieldResolver(() => [Int])
+  async followingsUsersIds(@Root() user: User, @Ctx() ctx: MyContext) {
+    const {
+      userId,
+      dataloaders: { followingsUsersIdsDataloader },
+    } = ctx
+
+    const result = await followingsUsersIdsDataloader.load(user.id)
+
+    return result
   }
 
   @Mutation(() => AuthResponse)

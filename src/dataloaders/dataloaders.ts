@@ -123,14 +123,22 @@ export const dataloaders = {
     return ids.map((id) => followersCount.find((f) => f.id === id))
   }),
   followingsCountDataloader: new DataLoader<number, any, any>(async (ids) => {
-    console.log('ids', ids)
     const followingsCount = await db('followers')
       .count('following_id')
       .whereIn('follower_id', ids)
       .select('follower_id as id')
       .groupBy('id')
 
-    console.log('followingsCount', followingsCount)
     return ids.map((id) => followingsCount.find((f) => f.id === id))
   }),
+  followingsUsersIdsDataloader: new DataLoader<number, any, any>(
+    async (ids) => {
+      const followingsIds = await db('followers')
+        .whereIn('follower_id', ids)
+        .pluck('following_id')
+
+      console.log('followingIds', followingsIds)
+      return ids.map((id) => followingsIds)
+    }
+  ),
 }

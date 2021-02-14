@@ -35,7 +35,11 @@ class FollowerResolver {
     @Arg('following_id') following_id: number,
     @Ctx() ctx: MyContext
   ) {
-    const { db, userId } = ctx
+    const {
+      db,
+      userId,
+      dataloaders: { followingsUsersIdsDataloader },
+    } = ctx
 
     try {
       const userToFollow = await db('users').where('id', following_id)
@@ -65,6 +69,8 @@ class FollowerResolver {
         follower_id: userId,
         following_id,
       })
+
+      followingsUsersIdsDataloader.clear(userId)
 
       return 'User followed!'
     } catch (e) {

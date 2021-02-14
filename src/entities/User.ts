@@ -31,6 +31,9 @@ class User {
   @Field()
   followingsCount?: number
 
+  @Field(() => [Int], { nullable: true })
+  followingsUserIds?: number[]
+
   @Field()
   created_at: Date
 

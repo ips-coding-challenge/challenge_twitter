@@ -15,7 +15,7 @@ class UserResolver {
   @Query(() => User)
   @Authorized()
   async user(@Arg('username') username: string, @Ctx() ctx: MyContext) {
-    const { db } = ctx
+    const { db, userId } = ctx
 
     const [user] = await db('users').where('username', username)
     return user

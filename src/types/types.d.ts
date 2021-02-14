@@ -24,6 +24,7 @@ export type MyContext = {
     mediaDataloader: DataLoader<number, Media, unknown>
     followersCountDataloader: DataLoader<number, any, unknown>
     followingsCountDataloader: DataLoader<number, any, unknown>
+    followingsUsersIdsDataloader: DataLoader<any, any, unknown>
   }
   repositories: {
     tweetRepository: TweetRepository
