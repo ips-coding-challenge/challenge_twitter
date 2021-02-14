@@ -29,6 +29,9 @@ class User {
   followersCount?: number
 
   @Field()
+  followingsCount?: number
+
+  @Field()
   created_at: Date
 
   @Field()

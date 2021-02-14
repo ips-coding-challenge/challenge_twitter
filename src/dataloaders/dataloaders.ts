@@ -111,4 +111,26 @@ export const dataloaders = {
 
     return ids.map((id) => medias.find((m) => m.tweet_id === id))
   }),
+  followersCountDataloader: new DataLoader<number, any, any>(async (ids) => {
+    console.log('ids', ids)
+    const followersCount = await db('followers')
+      .count('follower_id')
+      .whereIn('following_id', ids)
+      .select('following_id as id')
+      .groupBy('id')
+
+    console.log('followersCount', followersCount)
+    return ids.map((id) => followersCount.find((f) => f.id === id))
+  }),
+  followingsCountDataloader: new DataLoader<number, any, any>(async (ids) => {
+    console.log('ids', ids)
+    const followingsCount = await db('followers')
+      .count('following_id')
+      .whereIn('follower_id', ids)
+      .select('follower_id as id')
+      .groupBy('id')
+
+    console.log('followingsCount', followingsCount)
+    return ids.map((id) => followingsCount.find((f) => f.id === id))
+  }),
 }
