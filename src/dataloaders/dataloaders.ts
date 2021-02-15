@@ -44,8 +44,6 @@ export const dataloaders = {
         .as('results')
     )
 
-    console.log('infos', infos)
-
     return tweetIds.map((id) => {
       const results = infos.reduce((acc, current) => {
         for (const [key, value] of Object.entries(current)) {
@@ -59,7 +57,6 @@ export const dataloaders = {
           }
         }
 
-        console.log('acc', acc)
         return acc
       }, [])
 
@@ -114,4 +111,32 @@ export const dataloaders = {
 
     return ids.map((id) => medias.find((m) => m.tweet_id === id))
   }),
+  followersCountDataloader: new DataLoader<number, any, any>(async (ids) => {
+    console.log('ids', ids)
+    const followersCount = await db('followers')
+      .count('follower_id')
+      .whereIn('following_id', ids)
+      .select('following_id as id')
+      .groupBy('id')
+
+    return ids.map((id) => followersCount.find((f) => f.id === id))
+  }),
+  followingsCountDataloader: new DataLoader<number, any, any>(async (ids) => {
+    const followingsCount = await db('followers')
+      .count('following_id')
+      .whereIn('follower_id', ids)
+      .select('follower_id as id')
+      .groupBy('id')
+
+    return ids.map((id) => followingsCount.find((f) => f.id === id))
+  }),
+  followingsUsersIdsDataloader: new DataLoader<number, any, any>(
+    async (ids) => {
+      const followingsIds = await db('followers')
+        .whereIn('follower_id', ids)
+        .pluck('following_id')
+
+      return ids.map((id) => followingsIds)
+    }
+  ),
 }

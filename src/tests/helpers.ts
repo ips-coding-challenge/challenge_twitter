@@ -89,3 +89,19 @@ export const createBookmark = async (user: User, tweet: Tweet) => {
 
   return bookmark
 }
+
+export const createMedia = async (
+  user: User,
+  tweet: Tweet,
+  url: string = 'http://test.com'
+) => {
+  const [media] = await db('medias')
+    .insert({
+      url,
+      user_id: user.id,
+      tweet_id: tweet.id,
+    })
+    .returning('*')
+
+  return media
+}

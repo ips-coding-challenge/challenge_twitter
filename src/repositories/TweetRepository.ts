@@ -3,7 +3,73 @@ import Tweet from '../entities/Tweet'
 import { selectCountsForTweet } from '../utils/utils'
 import BaseRepository from './BaseRepository'
 
+export enum Filters {
+  TWEETS_RETWEETS,
+  WITH_COMMENTS,
+  ONLY_MEDIA,
+  ONLY_LIKES,
+}
+
 class TweetRepository extends BaseRepository {
+  // get the tweets from a particular user
+  async tweets(
+    userId: number,
+    limit: number = 20,
+    offset: number = 0,
+    filter?: Filters
+  ) {
+    const qb = this.db('tweets')
+    let select = ['tweets.*', ...selectCountsForTweet(this.db)]
+
+    if (
+      filter === Filters.TWEETS_RETWEETS ||
+      filter === Filters.WITH_COMMENTS
+    ) {
+      select = [
+        ...select,
+        this.db.raw(
+          'greatest(tweets.created_at, retweets.created_at) as greatest_created_at'
+        ),
+        this.db.raw(
+          '(select rt.tweet_id from retweets rt where rt.tweet_id = tweets.id and rt.user_id = ?) as original_tweet_id',
+          [userId]
+        ),
+      ]
+      qb.fullOuterJoin('retweets', 'retweets.tweet_id', '=', 'tweets.id')
+      qb.orderBy('greatest_created_at', 'desc')
+      qb.orWhere('retweets.user_id', userId)
+      qb.orWhere('tweets.user_id', userId)
+
+      if (filter === Filters.TWEETS_RETWEETS) {
+        qb.andWhere('type', 'tweet')
+      }
+    }
+
+    if (filter === Filters.ONLY_MEDIA) {
+      qb.innerJoin('medias', 'medias.tweet_id', 'tweets.id')
+      qb.where('medias.user_id', userId)
+      qb.orderBy('created_at', 'desc')
+    }
+
+    if (filter === Filters.ONLY_LIKES) {
+      select = [
+        ...select,
+        this.db.raw(
+          'greatest(tweets.created_at, likes.created_at) as greatest_created_at'
+        ),
+        this.db.raw(
+          '(select l.tweet_id from likes l where l.tweet_id = tweets.id and l.user_id = ?) as original_tweet_id',
+          [userId]
+        ),
+      ]
+      qb.innerJoin('likes', 'likes.tweet_id', 'tweets.id')
+      qb.where('likes.user_id', userId)
+      qb.orderBy('greatest_created_at', 'desc')
+    }
+
+    return await qb.select(select).limit(limit).offset(offset)
+  }
+
   // Get the feed from the user
   async feed(
     userId: number,

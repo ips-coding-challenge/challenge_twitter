@@ -9,6 +9,32 @@ export const FEED = gql`
       likesCount
       commentsCount
       retweetsCount
+      likeAuthor {
+        username
+        display_name
+      }
+      retweetAuthor {
+        username
+        display_name
+      }
+      user {
+        id
+        username
+        display_name
+      }
+    }
+  }
+`
+
+export const TWEETS = gql`
+  query($user_id: Float!, $limit: Int, $offset: Int, $filter: Filters) {
+    tweets(user_id: $user_id, limit: $limit, offset: $offset, filter: $filter) {
+      id
+      body
+      visibility
+      likesCount
+      commentsCount
+      retweetsCount
       user {
         id
         username

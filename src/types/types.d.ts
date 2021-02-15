@@ -22,6 +22,9 @@ export type MyContext = {
     isRetweetedDataloader: DataLoader<any, any, unknown>
     isBookmarkedDataloader: DataLoader<any, any, unknown>
     mediaDataloader: DataLoader<number, Media, unknown>
+    followersCountDataloader: DataLoader<number, any, unknown>
+    followingsCountDataloader: DataLoader<number, any, unknown>
+    followingsUsersIdsDataloader: DataLoader<any, any, unknown>
   }
   repositories: {
     tweetRepository: TweetRepository
