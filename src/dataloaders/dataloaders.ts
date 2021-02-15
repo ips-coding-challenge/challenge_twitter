@@ -119,7 +119,6 @@ export const dataloaders = {
       .select('following_id as id')
       .groupBy('id')
 
-    console.log('followersCount', followersCount)
     return ids.map((id) => followersCount.find((f) => f.id === id))
   }),
   followingsCountDataloader: new DataLoader<number, any, any>(async (ids) => {
@@ -137,7 +136,6 @@ export const dataloaders = {
         .whereIn('follower_id', ids)
         .pluck('following_id')
 
-      console.log('followingIds', followingsIds)
       return ids.map((id) => followingsIds)
     }
   ),

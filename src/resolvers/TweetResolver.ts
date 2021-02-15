@@ -105,7 +105,6 @@ class TweetResolver {
 
   @FieldResolver(() => TweetTypeEnum)
   type(@Root() tweet: Tweet) {
-    console.log('tweet', tweet)
     if (tweet.original_tweet_id) {
       return TweetTypeEnum.RETWEET
     }
