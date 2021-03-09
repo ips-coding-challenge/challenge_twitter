@@ -22,6 +22,7 @@ import TweetUserInfos from '../entities/TweetUserInfo'
 import User from '../entities/User'
 import { Filters } from '../repositories/TweetRepository'
 import { MyContext } from '../types/types'
+import { selectCountsForTweet } from '../utils/utils'
 
 @ArgsType()
 class ArgsFilters {
@@ -71,14 +72,32 @@ class TweetResolver {
     return tweets
   }
 
+  @Query(() => Tweet)
+  @Authorized()
+  async tweet(@Arg('tweet_id') tweet_id: number, @Ctx() ctx: MyContext) {
+    const {
+      repositories: { tweetRepository },
+    } = ctx
+
+    const tweet = await tweetRepository.tweet(tweet_id)
+
+    console.log('tweet', tweet)
+
+    return tweet
+    //
+  }
+
   @Query(() => [Tweet])
+  @Authorized()
   async comments(@Arg('parent_id') parent_id: number, @Ctx() ctx: MyContext) {
     const { db } = ctx
 
-    const comments = await db('tweets').where({
-      parent_id,
-      type: TweetTypeEnum.COMMENT,
-    })
+    const comments = await db('tweets')
+      .where({
+        parent_id,
+        type: TweetTypeEnum.COMMENT,
+      })
+      .select(['tweets.*', ...selectCountsForTweet(db)])
 
     return comments
   }

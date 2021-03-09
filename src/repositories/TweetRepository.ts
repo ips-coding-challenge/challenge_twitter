@@ -11,6 +11,14 @@ export enum Filters {
 }
 
 class TweetRepository extends BaseRepository {
+  async tweet(tweet_id: number): Promise<Tweet> {
+    const [tweet] = await this.db('tweets')
+      .where('id', tweet_id)
+      .select(['tweets.*', ...selectCountsForTweet(this.db)])
+
+    return tweet
+  }
+
   // get the tweets from a particular user
   async tweets(
     userId: number,
