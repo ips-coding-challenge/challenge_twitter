@@ -95,6 +95,12 @@ class TweetRepository extends BaseRepository {
       ...selectCountsForTweet(this.db),
     ]
 
+    const [total]: any = await this.totalCountFeed(followedUsers, userId)
+
+    if (offset > total) {
+      return []
+    }
+
     const tweets = await this.db
       .from(
         this.db
@@ -181,6 +187,63 @@ class TweetRepository extends BaseRepository {
       .offset(offset)
 
     return tweets
+  }
+
+  async totalCountFeed(followedUsers: any[], userId: number) {
+    return await this.db.sum(this.db.raw('cnt')).from(
+      this.db
+        // I do a union from 3 subqueries
+        .union(
+          [
+            // First Query
+            // I select the tweets from the tweets table
+            // and it will return the tweets and comments
+            this.db
+              .select(this.db.raw('count(tweets.id) as cnt'))
+              .from('tweets')
+              // I want the tweets/comments from the followedUsers and
+              // those from the connected user
+              .whereIn('tweets.user_id', [...followedUsers, userId]),
+            // SECOND Query
+            this.db
+              .select(this.db.raw('count(tweets.id) as cnt'))
+              .from('tweets')
+              .innerJoin('likes', 'likes.tweet_id', '=', 'tweets.id')
+              .innerJoin('users', 'users.id', '=', 'likes.user_id')
+              // I only want the likes from the followedUsers
+              .whereIn('tweets.id', function () {
+                this.select('l.tweet_id')
+                  .from('likes as l')
+                  .whereIn('l.user_id', followedUsers)
+              })
+              // And if the user liked and retweeted the tweet, I "ignore" the like
+              .whereNotIn('tweets.id', function () {
+                this.select('retweets.tweet_id')
+                  .from('retweets')
+                  .whereIn('retweets.user_id', followedUsers)
+              })
+              // I don't want the connected users likes
+              .andWhere('likes.user_id', '!=', userId),
+
+            // Third QUERY
+            this.db
+              .select(this.db.raw('count(tweets.id) as cnt'))
+              .from('tweets')
+              .innerJoin('retweets', 'retweets.tweet_id', '=', 'tweets.id')
+              .innerJoin('users', 'users.id', '=', 'retweets.user_id')
+              .whereIn('tweets.id', function () {
+                this.select('rt.tweet_id')
+                  .from('retweets as rt')
+                  .whereIn('rt.user_id', followedUsers)
+              })
+              .andWhere('retweets.user_id', '!=', userId),
+          ],
+          // Put parenthesis between the queries (Knex option)
+          // select * from ((select * from foo) union (select * from bar)) results
+          true
+        )
+        .as('results')
+    )
   }
 }
 

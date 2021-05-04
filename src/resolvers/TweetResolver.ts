@@ -25,13 +25,16 @@ import { MyContext } from '../types/types'
 import { selectCountsForTweet } from '../utils/utils'
 
 @ArgsType()
+class PageInfo {
+  @Field(() => Int, { nullable: true })
+  limit: number = 20
+
+  @Field(() => Int, { nullable: true })
+  offset: number = 0
+}
+
+@ArgsType()
 class ArgsFilters {
-  @Field(() => Int, { nullable: true })
-  limit?: number = 20
-
-  @Field(() => Int, { nullable: true })
-  offset?: number = 0
-
   @Field(() => Filters, { nullable: true })
   filter?: Filters = Filters.TWEETS_RETWEETS
 }
@@ -40,7 +43,7 @@ class ArgsFilters {
 class TweetResolver {
   @Query(() => [Tweet])
   @Authorized()
-  async feed(@Ctx() ctx: MyContext) {
+  async feed(@Args() { limit, offset }: PageInfo, @Ctx() ctx: MyContext) {
     const {
       userId,
       repositories: { tweetRepository, followerRepository },
@@ -51,7 +54,7 @@ class TweetResolver {
       'following_id'
     )
 
-    const tweets = tweetRepository.feed(userId!, followedUsers)
+    const tweets = tweetRepository.feed(userId!, followedUsers, limit, offset)
 
     return tweets
   }
@@ -59,7 +62,8 @@ class TweetResolver {
   @Query(() => [Tweet])
   @Authorized()
   async tweets(
-    @Args() { limit, offset, filter }: ArgsFilters,
+    @Args() { limit, offset }: PageInfo,
+    @Args() { filter }: ArgsFilters,
     @Arg('user_id') user_id: number,
     @Ctx() ctx: MyContext
   ) {
@@ -89,7 +93,11 @@ class TweetResolver {
 
   @Query(() => [Tweet])
   @Authorized()
-  async comments(@Arg('parent_id') parent_id: number, @Ctx() ctx: MyContext) {
+  async comments(
+    @Args() { limit, offset }: PageInfo,
+    @Arg('parent_id') parent_id: number,
+    @Ctx() ctx: MyContext
+  ) {
     const { db } = ctx
 
     const comments = await db('tweets')
@@ -98,6 +106,8 @@ class TweetResolver {
         type: TweetTypeEnum.COMMENT,
       })
       .select(['tweets.*', ...selectCountsForTweet(db)])
+      .limit(limit)
+      .offset(offset)
 
     return comments
   }
