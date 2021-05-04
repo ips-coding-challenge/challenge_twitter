@@ -106,6 +106,7 @@ class TweetResolver {
         type: TweetTypeEnum.COMMENT,
       })
       .select(['tweets.*', ...selectCountsForTweet(db)])
+      .orderBy('id', 'desc')
       .limit(limit)
       .offset(offset)
 
