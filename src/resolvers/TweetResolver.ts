@@ -22,15 +22,19 @@ import TweetUserInfos from '../entities/TweetUserInfo'
 import User from '../entities/User'
 import { Filters } from '../repositories/TweetRepository'
 import { MyContext } from '../types/types'
+import { selectCountsForTweet } from '../utils/utils'
+
+@ArgsType()
+class PageInfo {
+  @Field(() => Int, { nullable: true })
+  limit: number = 20
+
+  @Field(() => Int, { nullable: true })
+  offset: number = 0
+}
 
 @ArgsType()
 class ArgsFilters {
-  @Field(() => Int, { nullable: true })
-  limit?: number = 20
-
-  @Field(() => Int, { nullable: true })
-  offset?: number = 0
-
   @Field(() => Filters, { nullable: true })
   filter?: Filters = Filters.TWEETS_RETWEETS
 }
@@ -39,7 +43,7 @@ class ArgsFilters {
 class TweetResolver {
   @Query(() => [Tweet])
   @Authorized()
-  async feed(@Ctx() ctx: MyContext) {
+  async feed(@Args() { limit, offset }: PageInfo, @Ctx() ctx: MyContext) {
     const {
       userId,
       repositories: { tweetRepository, followerRepository },
@@ -50,7 +54,7 @@ class TweetResolver {
       'following_id'
     )
 
-    const tweets = tweetRepository.feed(userId!, followedUsers)
+    const tweets = tweetRepository.feed(userId!, followedUsers, limit, offset)
 
     return tweets
   }
@@ -58,7 +62,8 @@ class TweetResolver {
   @Query(() => [Tweet])
   @Authorized()
   async tweets(
-    @Args() { limit, offset, filter }: ArgsFilters,
+    @Args() { limit, offset }: PageInfo,
+    @Args() { filter }: ArgsFilters,
     @Arg('user_id') user_id: number,
     @Ctx() ctx: MyContext
   ) {
@@ -71,14 +76,39 @@ class TweetResolver {
     return tweets
   }
 
+  @Query(() => Tweet)
+  @Authorized()
+  async tweet(@Arg('tweet_id') tweet_id: number, @Ctx() ctx: MyContext) {
+    const {
+      repositories: { tweetRepository },
+    } = ctx
+
+    const tweet = await tweetRepository.tweet(tweet_id)
+
+    console.log('tweet', tweet)
+
+    return tweet
+    //
+  }
+
   @Query(() => [Tweet])
-  async comments(@Arg('parent_id') parent_id: number, @Ctx() ctx: MyContext) {
+  @Authorized()
+  async comments(
+    @Args() { limit, offset }: PageInfo,
+    @Arg('parent_id') parent_id: number,
+    @Ctx() ctx: MyContext
+  ) {
     const { db } = ctx
 
-    const comments = await db('tweets').where({
-      parent_id,
-      type: TweetTypeEnum.COMMENT,
-    })
+    const comments = await db('tweets')
+      .where({
+        parent_id,
+        type: TweetTypeEnum.COMMENT,
+      })
+      .select(['tweets.*', ...selectCountsForTweet(db)])
+      .orderBy('id', 'desc')
+      .limit(limit)
+      .offset(offset)
 
     return comments
   }

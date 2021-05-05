@@ -27,7 +27,7 @@ export const authChecker: AuthChecker<MyContext, string> = async (
       throw new AuthenticationError('User not found')
     }
 
-    context.userId = user.id
+    context.userId = id
     return true
   } catch (e) {
     if (roles.includes('ANONYMOUS')) {
